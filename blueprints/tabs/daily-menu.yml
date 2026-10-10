@@ -1,0 +1,14 @@
+# Tab "Tageskarte": date and dishes. A site adds it with
+#   tabs:
+#     tageskarte:
+#       extends: higawari/tabs/daily-menu
+label: higawari.panel.tab.label
+icon: list-bullet
+fields:
+  higawariInfo:
+    type: info
+    text: higawari.panel.info.text
+  tageskarteDatum:
+    extends: higawari/fields/date
+  tagesgerichte:
+    extends: higawari/fields/dishes

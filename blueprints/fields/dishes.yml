@@ -1,0 +1,36 @@
+# Structure field `tagesgerichte`: up to five dishes. Field names are a
+# compatibility contract (README, Content field contract): Gasthaus Muster and
+# gasthaus-muster already store exactly these names.
+label: higawari.panel.dishes.label
+type: structure
+max: 5
+columns:
+  gericht:
+    width: 3/4
+  preis:
+    width: 1/4
+fields:
+  gericht:
+    label: higawari.panel.dish.name.label
+    type: text
+    required: true
+    maxlength: 160
+  beschreibung:
+    label: higawari.panel.dish.description.label
+    type: textarea
+    buttons: false
+    size: small
+    maxlength: 300
+    help: higawari.panel.dish.description.help
+  preis:
+    label: higawari.panel.dish.price.label
+    type: number
+    min: 0
+    max: 999
+    step: 0.01
+    help: higawari.panel.dish.price.help
+  kennzeichnungen:
+    label: higawari.panel.dish.markers.label
+    type: text
+    maxlength: 40
+    help: higawari.panel.dish.markers.help
