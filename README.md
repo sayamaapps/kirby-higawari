@@ -1,0 +1,180 @@
+# Higawari
+
+Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is Japanese for "changes every day": a menu of dishes, each menu valid on a date you set, shown on that day and nothing else.
+
+- **A date, a window.** A menu is valid on its date, or on as many days as the site sets, counted from that date. Without a date nothing is shown, so an old card cannot linger.
+- **The Panel.** A tab with the date and up to five dishes (name, further lines, price, markers). Dish names are the only required text.
+- **Plain output.** One snippet with semantic HTML and `higawari-*` classes. No JavaScript, no request to another server, no cookie.
+- **Optional text when nothing is valid.** Either nothing, or a sentence of your choice.
+- **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/simsimmal/kirby-fude); see [examples/fude.php](examples/fude.php).
+
+Code, comments and this README are in English. The Panel texts and the snippet texts are in German and English.
+
+## Requirements
+
+- PHP 8.2 to 8.4
+- Kirby 5
+
+## Installation
+
+```sh
+composer require sayamaapps/kirby-higawari
+```
+
+Composer installs the plugin into `site/plugins/higawari/`. Until the package is on Packagist, add the repository first:
+
+```json
+"repositories": [{ "type": "vcs", "url": "https://github.com/simsimmal/kirby-higawari" }]
+```
+
+Off by default. Switch it on in `site/config/config.php`:
+
+```php
+return [
+    'sayamaapps.higawari.active' => true,
+];
+```
+
+## Configuration
+
+All options are read as `sayamaapps.higawari.<name>`, flat or nested. `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
+
+| Option | Default | Meaning |
+|---|---|---|
+| `active` | `false` | Master switch. Only a real `true` switches it on. |
+| `days` | `1` | How many days a menu is shown, counted from its date: `1` is the day itself, `3` is the date and the two days after. From 1 to 366. |
+| `timezone` | `Europe/Berlin` | The zone in which "today" is decided. |
+| `currency` | `€` | Shown after a price, with a space: `7,50 €`. An empty string shows bare numbers: `7,50`. |
+| `emptyText` | `null` | Shown in place of the menu when none is valid. `null` shows nothing. |
+| `note` | `null` | A line under the dishes, for example about prices or allergens. |
+| `language` | site language | `de` or `en`, for the snippet and Panel texts. Otherwise the default language, then the first two letters of `locale`, then English. |
+
+## Content field contract
+
+The Panel tab writes two fields. Their names are a contract: Gasthaus Muster and gasthaus-muster already store exactly these names, so their content needs no migration.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `tageskarteDatum` | date | "Gilt am": the day the menu is valid on. Empty: nothing is shown. |
+| `tagesgerichte` | structure, max. 5 | The dishes (see below). |
+
+Dish fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `gericht` | text, required, max. 160 | The dish. |
+| `beschreibung` | textarea, max. 300 | Further lines, one per line break. |
+| `preis` | number, 0 to 999, step 0.01 | Optional. Empty shows the dish without a price. |
+| `kennzeichnungen` | text, max. 40 | Optional markers, shown as written. |
+
+Reading rules, the same for the Panel content and imported data: a dish without a name is dropped; a price that cannot be read (`abc`, `1000`, `12.345`) drops the dish rather than showing a wrong amount; a decimal comma and a decimal point both work; at most five dishes are shown, in order.
+
+### Why these fields
+
+Both sources were compared: `site/plugins/aktuelles` in mustergasthaus and `site/plugins/gasthaus` in gasthaus-muster.
+
+- **`gericht`, `preis`, `beschreibung`:** both sources have them, with the same price check. Beimmuster keeps the extra text as one string; gasthaus splits it into lines, one per line break. Higawari splits it too, because a line break in a Panel field is the way editors write a list of sauces or sides.
+- **`kennzeichnungen`:** neither source has it. It is added as free text, because an allergen or marker list is a legal matter that the site should decide, not the package. A structured list (for example EU allergen numbers) would be a guess at that decision.
+- **`tageskarteDatum`:** mustergasthaus means "shown until", gasthaus means "the day of the card". Higawari takes gasthaus's meaning (the day it is served) and adds the window (`days`), so both sites fit. Beimmuster's "undated, shown until removed" is deliberately not kept: a daily menu without a date would show last week's dishes.
+- **Five dishes:** mustergasthaus's code and blueprint agree on five. gasthaus's blueprint allows ten and its code has no cap. Adopting gasthaus's content means five dishes are shown at most.
+- **Price format:** mustergasthaus writes `7,50 €`, gasthaus writes `7,50` (the unit is in the Panel only). The `currency` option covers both.
+
+### Left out on purpose
+
+- **Weekend and closing-day rules.** Neither source has them in the menu logic. Opening hours are another package's job ([Noren](https://github.com/simsimmal/kirby-noren)).
+- **Chat, Telegram, the Hermes plugin and the bot role** of mustergasthaus. Changes by chat are Fude's job.
+- **"Tageskarte leeren" as a Panel button.** The clearing itself is here (see below). The button needs a dialog in the site's own Panel area, which only the site can define.
+- **The picture beside the menu** of gasthaus, and its layout. Those are site design.
+
+## Blueprints
+
+Add the tab to a page blueprint with `extends`:
+
+```yaml
+# site/blueprints/pages/home.yml
+tabs:
+  tageskarte:
+    extends: higawari/tabs/daily-menu
+```
+
+Pieces for your own blueprints: `higawari/tabs/daily-menu` (the tab), `higawari/fields/date` and `higawari/fields/dishes`.
+
+## Snippet
+
+```php
+// The page that renders the template:
+snippet('higawari');
+
+// Another page, and a fixed clock (a DateTimeImmutable, for tests and previews):
+snippet('higawari', ['source' => $site->homePage(), 'now' => $customNow]);
+```
+
+Markup, with classes only and no inline style:
+
+```html
+<section class="higawari" aria-labelledby="higawari-titel">
+  <h2 class="higawari-titel" id="higawari-titel">Tageskarte</h2>
+  <p class="higawari-gilt"><time datetime="2026-10-10">Samstag, 10.10.2026</time></p>
+  <ul class="higawari-gerichte">
+    <li class="higawari-gericht">
+      <span class="higawari-name">Kartoffelsuppe</span>
+      <span class="higawari-preis">6,90 €</span>
+      <p class="higawari-beschreibung">mit Brot<br>und Kräutern</p>
+      <p class="higawari-kennzeichnungen">Kennzeichnungen: V, L</p>
+    </li>
+  </ul>
+  <p class="higawari-hinweis">…</p>        <!-- only with the note option -->
+</section>
+```
+
+With nothing valid, the snippet prints nothing, or only `<p class="higawari-leer">` with the `emptyText` option. Every value is escaped. The page is never cached by Kirby, because the menu depends on the clock. To change the markup, create `site/snippets/higawari.php`; Kirby uses it instead.
+
+No CSS is shipped. The classes are the hooks for your own stylesheet.
+
+## Page method
+
+```php
+$card = $page->higawariCard();                    // now, in the configured zone
+// [
+//     'from' => '2026-10-10', 'to' => '2026-10-10',
+//     'dishes' => [
+//         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'markers' => 'V, L'],
+//     ],
+// ]
+// or null: plugin off, not valid that day, or no usable dish
+```
+
+## Clearing
+
+```php
+use Higawari\Menu;
+
+$page->update(Menu::CLEARED);   // all dishes and the date, in one step
+```
+
+`CLEARED` empties both fields together. Keeping the date would hide a menu entered the next day, because the old date has already passed.
+
+## Fude
+
+[examples/fude.php](examples/fude.php) is a declaration for Fude's `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish, and sets the date to today on every change. Fude's current README documents `create` and `update` only. `replace`, `delete`, `touch` and `maxEntries` are the format this declaration is written against, and they have to be checked against Fude before the declaration is used.
+
+## Privacy
+
+Higawari sets no cookies, uses no browser storage, makes no request to a third party and processes no visitor data. The menu is computed on your server for each request from the content you enter. [PRIVACY.md](PRIVACY.md) describes the implementation in English, and [DATENSCHUTZ.md](DATENSCHUTZ.md) holds the German text block for a privacy policy. Both are not legal advice.
+
+## Development
+
+```sh
+composer install --ignore-platform-req=ext-gd   # Kirby is a dev dependency, used by the Kirby tests
+composer test                                   # or: sh tests/run.sh
+```
+
+Every `tests/*Test.php` is a standalone script: exit code 0 means pass, so the suite also runs on a hoster's PHP without a test framework. `MenuTest` and `I18nTest` need no Kirby; `KirbyTest` and `BlueprintsTest` boot a real Kirby 5 on a throwaway site and need no network connection. CI runs them on PHP 8.2 to 8.4.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+MIT, see [LICENSE](LICENSE).
