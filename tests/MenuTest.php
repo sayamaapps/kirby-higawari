@@ -1,0 +1,123 @@
+<?php
+/**
+ * Menu rules without Kirby: validity over date borders, time zones, daylight
+ * saving, windows of N days, prices, dishes, labels, clearing and the Fude example.
+ */
+require_once __DIR__ . '/helpers.php';
+require_once dirname(__DIR__) . '/src/I18n.php';
+require_once dirname(__DIR__) . '/src/Menu.php';
+
+use Higawari\I18n;
+use Higawari\Menu;
+
+I18n::setLanguage('de');
+$zone = 'Europe/Berlin';
+
+// Dates: strict Y-m-d, no overflow, no trailing text.
+foreach (['2026-10-10', ' 2026-10-10 ', '2026-02-28'] as $date) {
+    expect(true, Menu::isDate($date), "isDate('$date')");
+}
+foreach (['', '2026-02-31', 'morgen', '2026-10-10x', '10.10.2026', '2026-1-1'] as $date) {
+    expect(false, Menu::isDate($date), "not a date: '$date'");
+}
+
+// Shown on the day itself, Berlin time.
+expect(true, Menu::validOn('2026-10-10', at('2026-10-10 00:00'), 1, $zone), 'valid from 00:00 on the day');
+expect(true, Menu::validOn('2026-10-10', at('2026-10-10 23:59:59'), 1, $zone), 'valid until 23:59:59');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-09 23:59:59'), 1, $zone), 'not on the day before');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-11 00:00'), 1, $zone), 'not on the day after');
+expect(false, Menu::validOn('', at('2026-10-10 12:00'), 1, $zone), 'no date: never shown');
+expect(false, Menu::validOn('2026-02-31', at('2026-03-03 12:00'), 1, $zone), 'impossible date: never shown');
+
+// Time zones: the day is the configured zone's day, not UTC's.
+expect(true, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-09T22:30:00Z'), 1, $zone), '00:30 in Berlin is already the 10th');
+expect(false, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-09T22:30:00Z'), 1, 'UTC'), 'the same instant is still the 9th in UTC');
+expect(true, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-10T21:59:59Z'), 1, $zone), 'last second of the 10th in Berlin');
+expect(false, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-10T22:00:00Z'), 1, $zone), '22:00 UTC is midnight in Berlin: the 11th');
+
+// Winter time starts on 25.10.2026 (clocks go back at 03:00 CEST).
+expect(true, Menu::validOn('2026-10-25', new DateTimeImmutable('2026-10-25T22:59:59Z'), 1, $zone), 'winter time: last moment of 25.10.');
+expect(false, Menu::validOn('2026-10-25', new DateTimeImmutable('2026-10-25T23:00:00Z'), 1, $zone), 'winter time: 26.10. has begun');
+
+// Windows of N days, inclusive.
+expect(['from' => '2026-10-10', 'to' => '2026-10-12'], Menu::window('2026-10-10', 3, $zone), 'window of three days');
+expect(null, Menu::window('2026-10-10', 0, $zone), 'zero days: no window');
+expect(null, Menu::window('morgen', 3, $zone), 'invalid date: no window');
+expect(true, Menu::validOn('2026-10-10', at('2026-10-12 23:59:59'), 3, $zone), 'last day of the window is valid');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-13 00:00'), 3, $zone), 'day after the window is not');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-09 12:00'), 3, $zone), 'day before the window is not');
+expect(true, Menu::validOn('2026-10-24', at('2026-10-26 12:00'), 3, $zone), 'window across the change to winter time');
+expect(false, Menu::validOn('2026-10-24', at('2026-10-27 00:00'), 3, $zone), 'window across the change ends on time');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-10 12:00'), 0, $zone), 'zero days: never valid');
+
+// Prices: decimal comma, euro sign, optional, unreadable refused.
+expect('7,50 €', Menu::formatPrice('7,5'), 'comma price with euro sign');
+expect('7,50', Menu::formatPrice('7.5', ''), 'no currency: bare number');
+expect('12,50 €', Menu::formatPrice('12.50'), 'dot price');
+expect('', Menu::formatPrice(' '), 'empty price means no price');
+expect('999,00 €', Menu::formatPrice('999'), 'upper bound');
+foreach (['1e2', 'abc', '1000', '12.345', '-1', '7,5,5'] as $price) {
+    expect(null, Menu::formatPrice($price), "unreadable price '$price' is refused");
+}
+
+// Dishes: cleaned, broken rows dropped, order kept.
+expect([], Menu::dishes([]), 'no rows');
+$dishes = Menu::dishes([
+    ['gericht' => ' Suppe ', 'preis' => '7,5', 'beschreibung' => "Mit Brot\r\n\n  Kräutern  \n", 'kennzeichnungen' => ' V, L '],
+    ['gericht' => 'Gemüse', 'preis' => 12.5],
+    ['gericht' => 'Ohne Preis'],
+    ['gericht' => 'Verschrieben', 'preis' => 'abc'],
+    ['gericht' => '', 'preis' => '5'],
+    ['preis' => '5'],
+    ['gericht' => 'Schalter', 'preis' => true],
+    ['gericht' => 'Liste', 'preis' => []],
+    null,
+    'Text',
+]);
+expect(3, count($dishes), 'only the usable rows are kept');
+expect(
+    ['name' => 'Suppe', 'lines' => ['Mit Brot', 'Kräutern'], 'price' => '7,50 €', 'markers' => 'V, L'],
+    $dishes[0],
+    'first dish cleaned: trimmed, lines split, markers trimmed',
+);
+expect('12,50 €', $dishes[1]['price'], 'float price formatted');
+expect(['name' => 'Ohne Preis', 'lines' => [], 'price' => '', 'markers' => ''], $dishes[2], 'dish without price, lines or markers');
+expect('7,00', Menu::dishes([['gericht' => 'A', 'preis' => '7']], '')[0]['price'], 'dishes without currency');
+$many = Menu::dishes(array_map(static fn (int $i) => ['gericht' => "Gericht $i", 'preis' => 5], range(1, 8)));
+expect(5, count($many), 'at most five dishes');
+expect('Gericht 5', $many[4]['name'], 'the first five, in order');
+
+// Card: only on a valid day with at least one dish.
+$rows = [['gericht' => 'Suppe', 'preis' => '7']];
+expect(
+    ['from' => '2026-10-10', 'to' => '2026-10-10', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+    Menu::card('2026-10-10', $rows, at('2026-10-10 12:00'), 1, $zone, '€'),
+    'card on its day',
+);
+expect(null, Menu::card('2026-10-11', $rows, at('2026-10-10 12:00'), 1, $zone), 'no card on another day');
+expect(null, Menu::card('2026-10-10', [['gericht' => '']], at('2026-10-10 12:00'), 1, $zone), 'no card without a usable dish');
+expect(null, Menu::card('', $rows, at('2026-10-10 12:00'), 1, $zone), 'no card without a date');
+
+// Labels, German and English.
+expect('Samstag, 10.10.2026', Menu::displayDate('2026-10-10'), 'German weekday and date');
+expect('', Menu::displayDate('2026-02-31'), 'invalid date: empty label');
+expect('Samstag, 10.10.2026', Menu::label('2026-10-10', '2026-10-10'), 'one day: one date');
+expect('Samstag, 10.10.2026 – Montag, 12.10.2026', Menu::label('2026-10-10', '2026-10-12'), 'several days: from – to');
+I18n::setLanguage('en');
+expect('Saturday, 10 October 2026', Menu::displayDate('2026-10-10'), 'English weekday and date');
+I18n::setLanguage('de');
+
+// Clearing empties dishes and date together.
+expect(['tagesgerichte' => [], 'tageskarteDatum' => ''], Menu::CLEARED, 'CLEARED');
+
+// The Fude declaration example.
+$fude = require dirname(__DIR__) . '/examples/fude.php';
+$collection = $fude['collections']['tageskarte'];
+expect('structure', $collection['kind'], 'fude: kind structure');
+expect(Menu::FIELD_DISHES, $collection['field'], 'fude: field is the dishes field');
+expect(['replace', 'update', 'delete'], $collection['actions'], 'fude: actions');
+expect(Menu::MAX_DISHES, $collection['maxEntries'], 'fude: maxEntries equals the logic cap');
+expect(['field' => Menu::FIELD_DATE, 'value' => 'today'], $collection['touch'], 'fude: touch sets the date to today');
+expect(['gericht', 'beschreibung', 'preis', 'kennzeichnungen'], array_keys($collection['fields']), 'fude: declared fields');
+
+finish('Higawari Menu');
