@@ -1,0 +1,42 @@
+{
+    "name": "sayamaapps/kirby-higawari",
+    "description": "Daily menu (Tageskarte) for Kirby CMS 5: dishes with a validity date and window, a Panel structure, a plain snippet and a Fude collection declaration. No scripts, no third-party requests, no chat or write endpoint.",
+    "type": "kirby-plugin",
+    "license": "MIT",
+    "keywords": ["kirby", "kirby-plugin", "kirby-5", "daily-menu", "menu", "restaurant", "privacy"],
+    "homepage": "https://github.com/simsimmal/kirby-higawari",
+    "authors": [
+        {
+            "name": "Simon Räder",
+            "homepage": "https://sayamaapps.de"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/simsimmal/kirby-higawari/issues",
+        "source": "https://github.com/simsimmal/kirby-higawari"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-mbstring": "*",
+        "getkirby/composer-installer": "^1.2"
+    },
+    "require-dev": {
+        "getkirby/cms": "^5.0"
+    },
+    "scripts": {
+        "test": "sh tests/run.sh"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "getkirby/composer-installer": true
+        },
+        "platform": {
+            "php": "8.2.0"
+        }
+    },
+    "extra": {
+        "installer-name": "higawari",
+        "kirby-cms-path": false
+    }
+}
