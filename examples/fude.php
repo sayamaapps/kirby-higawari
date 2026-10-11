@@ -6,10 +6,10 @@
  * every change. Higawari itself has no chat or write endpoint; this is only the
  * declaration Fude reads.
  *
- * The keys `actions`, `maxEntries` and `touch` are the Fude format this
- * package is written against. Fude's README does not document them yet
- * (replace, delete, touch) and must be checked against Fude before the
- * declaration is used.
+ * The keys `actions`, `maxEntries` and `touch` and the field type `number`
+ * are documented in Fude's README (Unreleased in its CHANGELOG). `touch`
+ * stamps the day in Fude's option `fude.timezone` (default Europe/Berlin),
+ * not PHP's time zone — set it if the restaurant is elsewhere.
  *
  * Merge the collection into the `collections` array of site/config/fude.php.
  */
@@ -29,8 +29,8 @@ return [
             'fields'     => [
                 'gericht'          => ['type' => 'text', 'required' => true, 'maxlength' => 160],
                 'beschreibung'     => ['type' => 'textarea', 'maxlength' => 300],
-                // Fude has no number type yet: the price is text, written with a decimal comma.
-                'preis'            => ['type' => 'text'],
+                // Decimal comma or point; min 0 and max 999 come from the blueprint.
+                'preis'            => ['type' => 'number'],
                 'kennzeichnungen'  => ['type' => 'text', 'maxlength' => 40],
             ],
         ],

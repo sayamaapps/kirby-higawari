@@ -156,7 +156,7 @@ $page->update(Menu::CLEARED);   // all dishes and the date, in one step
 
 ## Fude
 
-[examples/fude.php](examples/fude.php) is a declaration for Fude's `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish, and sets the date to today on every change. Fude's current README documents `create` and `update` only. `replace`, `delete`, `touch` and `maxEntries` are the format this declaration is written against, and they have to be checked against Fude before the declaration is used.
+[examples/fude.php](examples/fude.php) is a declaration for Fude's `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish, and sets the date to today on every change. `replace`, `delete`, `touch`, `maxEntries` and the field type `number` are in Fude's README (Unreleased in its CHANGELOG). `touch` stamps the day in Fude's `fude.timezone` (default Europe/Berlin).
 
 ## Privacy
 
