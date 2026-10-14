@@ -1,6 +1,6 @@
 # Structure field `tagesgerichte`: up to five dishes. Field names are a
-# compatibility contract (README, Content field contract): Gasthaus Muster and
-# gasthaus-muster already store exactly these names.
+# compatibility promise (README, Content field contract): sites that already
+# store exactly these names keep working unchanged.
 label: higawari.panel.dishes.label
 type: structure
 max: 5

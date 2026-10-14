@@ -13,9 +13,10 @@ use DateTimeZone;
  * date itself, or `sayamaapps.higawari.days` days counted from it. Without a
  * date nothing is shown, so a forgotten card cannot linger for weeks.
  *
- * The rules come from mustergasthaus (price check, five-dish cap, clearing) and
- * gasthaus-muster (weekday + date, multi-line descriptions). Where the two
- * differ, this file takes mustergasthaus's behaviour and says so in the README.
+ * Rules: every price passes the same check, at most five dishes are shown,
+ * clearing removes the date and all dishes together, the label shows one date
+ * or a from-to range for a multi-day window, and a dish description may span
+ * several lines.
  */
 final class Menu
 {

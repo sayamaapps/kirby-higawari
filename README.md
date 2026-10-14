@@ -51,7 +51,7 @@ All options are read as `sayamaapps.higawari.<name>`, flat or nested. `null` cou
 
 ## Content field contract
 
-The Panel tab writes two fields. Their names are a contract: Gasthaus Muster and gasthaus-muster already store exactly these names, so their content needs no migration.
+The Panel tab writes two fields. Their names are a compatibility promise: sites that already store these field names keep working unchanged, so their content needs no migration.
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -71,20 +71,18 @@ Reading rules, the same for the Panel content and imported data: a dish without 
 
 ### Why these fields
 
-Both sources were compared: `site/plugins/aktuelles` in mustergasthaus and `site/plugins/gasthaus` in gasthaus-muster.
-
-- **`gericht`, `preis`, `beschreibung`:** both sources have them, with the same price check. Beimmuster keeps the extra text as one string; gasthaus splits it into lines, one per line break. Higawari splits it too, because a line break in a Panel field is the way editors write a list of sauces or sides.
-- **`kennzeichnungen`:** neither source has it. It is added as free text, because an allergen or marker list is a legal matter that the site should decide, not the package. A structured list (for example EU allergen numbers) would be a guess at that decision.
-- **`tageskarteDatum`:** mustergasthaus means "shown until", gasthaus means "the day of the card". Higawari takes gasthaus's meaning (the day it is served) and adds the window (`days`), so both sites fit. Beimmuster's "undated, shown until removed" is deliberately not kept: a daily menu without a date would show last week's dishes.
-- **Five dishes:** mustergasthaus's code and blueprint agree on five. gasthaus's blueprint allows ten and its code has no cap. Adopting gasthaus's content means five dishes are shown at most.
-- **Price format:** mustergasthaus writes `7,50 €`, gasthaus writes `7,50` (the unit is in the Panel only). The `currency` option covers both.
+- **`gericht`, `preis`, `beschreibung`:** the same price check applies to every price. The extra text can be kept as one string or split into lines; Higawari splits it, because a line break in a Panel field is the way editors write a list of sauces or sides.
+- **`kennzeichnungen`:** free text, because an allergen or marker list is a legal matter that the site should decide, not the package. A structured list (for example EU allergen numbers) would be a guess at that decision.
+- **`tageskarteDatum`:** the day the menu is served, plus the window (`days`), so a menu can be shown for more than one day. An undated menu that stays visible until it is removed is deliberately not supported: a daily menu without a date would show last week's dishes.
+- **Five dishes:** the cap is five, both in the code and in the blueprint, so a larger blueprint cannot show more dishes than the code does.
+- **Price format:** `7,50 €` or `7,50`, depending on whether the Panel shows the unit. The `currency` option covers both.
 
 ### Left out on purpose
 
 - **Weekend and closing-day rules.** Neither source has them in the menu logic. Opening hours are another package's job ([Noren](https://github.com/simsimmal/kirby-noren)).
-- **Chat, Telegram, the Hermes plugin and the bot role** of mustergasthaus. Changes by chat are Fude's job.
+- **Chat, Telegram, a Hermes plugin and a bot role.** Changes by chat are Fude's job.
 - **"Tageskarte leeren" as a Panel button.** The clearing itself is here (see below). The button needs a dialog in the site's own Panel area, which only the site can define.
-- **The picture beside the menu** of gasthaus, and its layout. Those are site design.
+- **The picture beside the menu**, and its layout. Those are site design.
 
 ## Blueprints
 

@@ -13,9 +13,8 @@ All notable changes to this project are documented here. Versions follow
 
 ## [1.0.0] — 2026-10-11
 
-First release. Built from the Tageskarte of Gasthaus Muster (`plugins/aktuelles`)
-and of gasthaus-muster (`plugins/gasthaus`), generalised as planned in module 9
-of the Kirby fleet plan.
+First release. Built from the daily menus of two existing sites, generalised
+into one package.
 
 ### Added
 

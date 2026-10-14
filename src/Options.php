@@ -68,7 +68,7 @@ final class Options
         return Menu::DEFAULT_TIMEZONE;
     }
 
-    /** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"), as gasthaus does. */
+    /** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"). */
     public static function currency(App $kirby): string
     {
         $value = self::get($kirby, 'currency', self::DEFAULT_CURRENCY);
