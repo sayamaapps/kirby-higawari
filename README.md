@@ -6,7 +6,7 @@ Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is
 - **The Panel.** A tab with the date and up to five dishes (name, further lines, price, markers). Dish names are the only required text.
 - **Plain output.** One snippet with semantic HTML and `higawari-*` classes. No JavaScript, no request to another server, no cookie.
 - **Optional text when nothing is valid.** Either nothing, or a sentence of your choice.
-- **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/simsimmal/kirby-fude); see [examples/fude.php](examples/fude.php).
+- **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/simsimmal/kirby-fude), which reads the marker in the dishes blueprint (see below).
 
 Code, comments and this README are in English. The Panel texts and the snippet texts are in German and English.
 
@@ -154,7 +154,11 @@ $page->update(Menu::CLEARED);   // all dishes and the date, in one step
 
 ## Fude
 
-[examples/fude.php](examples/fude.php) is a declaration for Fude's `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish, and sets the date to today on every change. `replace`, `delete`, `touch`, `maxEntries` and the field type `number` are in Fude's README (Unreleased in its CHANGELOG). `touch` stamps the day in Fude's `fude.timezone` (default Europe/Berlin).
+The dishes field carries a `fude:` marker, so a site with Fude 1.2 or later gets the menu as a chat collection without a line in `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish (at most five), and every change sets `tageskarteDatum` to today. `touch` stamps the day in Fude's `fude.timezone` (default Europe/Berlin). Without Fude, Kirby ignores the marker.
+
+- The collection is named `<page id>-tagesgerichte`, for example `home-tagesgerichte`.
+- The page needs both fields, as the tab brings them. A blueprint that extends only `higawari/fields/dishes` makes every Fude route fail, because the date to stamp is missing.
+- To switch it off, or to change it, use Fude's overrides in `site/config/fude.php`: `'home-tagesgerichte' => false` removes the collection, an array under the same name replaces it.
 
 ## Privacy
 

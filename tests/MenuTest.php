@@ -1,7 +1,7 @@
 <?php
 /**
  * Menu rules without Kirby: validity over date borders, time zones, daylight
- * saving, windows of N days, prices, dishes, labels, clearing and the Fude example.
+ * saving, windows of N days, prices, dishes, labels and clearing.
  */
 require_once __DIR__ . '/helpers.php';
 require_once dirname(__DIR__) . '/src/I18n.php';
@@ -109,15 +109,5 @@ I18n::setLanguage('de');
 
 // Clearing empties dishes and date together.
 expect(['tagesgerichte' => [], 'tageskarteDatum' => ''], Menu::CLEARED, 'CLEARED');
-
-// The Fude declaration example.
-$fude = require dirname(__DIR__) . '/examples/fude.php';
-$collection = $fude['collections']['tageskarte'];
-expect('structure', $collection['kind'], 'fude: kind structure');
-expect(Menu::FIELD_DISHES, $collection['field'], 'fude: field is the dishes field');
-expect(['replace', 'update', 'delete'], $collection['actions'], 'fude: actions');
-expect(Menu::MAX_DISHES, $collection['maxEntries'], 'fude: maxEntries equals the logic cap');
-expect(['field' => Menu::FIELD_DATE, 'value' => 'today'], $collection['touch'], 'fude: touch sets the date to today');
-expect(['gericht', 'beschreibung', 'preis', 'kennzeichnungen'], array_keys($collection['fields']), 'fude: declared fields');
 
 finish('Higawari Menu');
