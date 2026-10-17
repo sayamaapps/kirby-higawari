@@ -1,6 +1,6 @@
 {
     "name": "sayamaapps/kirby-higawari",
-    "description": "Daily menu (Tageskarte) for Kirby CMS 5: dishes with a validity date and window, a Panel structure, a plain snippet and a Fude collection declaration. No scripts, no third-party requests, no chat or write endpoint.",
+    "description": "Daily menu (Tageskarte) for Kirby CMS 5: dishes with a validity date and window, a Panel structure, a plain snippet and a Fude marker for changes by chat. No scripts, no third-party requests, no chat or write endpoint.",
     "type": "kirby-plugin",
     "license": "MIT",
     "keywords": ["kirby", "kirby-plugin", "kirby-5", "daily-menu", "menu", "restaurant", "privacy"],
@@ -19,6 +19,9 @@
         "php": "^8.2",
         "ext-mbstring": "*",
         "getkirby/composer-installer": "^1.2"
+    },
+    "conflict": {
+        "sayamaapps/kirby-fude": "<1.2"
     },
     "require-dev": {
         "getkirby/cms": "^5.0"

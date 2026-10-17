@@ -11,6 +11,20 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [Unreleased]
+
+### Changed
+
+- **Fude reads the menu from the blueprint.** The dishes field carries a
+  `fude:` marker (replace, update, delete, at most five dishes, the date set to
+  today on every change), so a site with Fude gets the collection
+  `<page id>-tagesgerichte` without its own declaration. Needs Fude 1.2 or
+  later; `composer.json` conflicts with older versions, which refuse the
+  marker option `touch`.
+- `examples/fude.php` is gone. A site that copied it into
+  `site/config/fude.php` now has the menu twice: delete that entry, or set
+  `'<page id>-tagesgerichte' => false` to keep its own.
+
 ## [1.0.0] — 2026-10-11
 
 First release. Built from the daily menus of two existing sites, generalised

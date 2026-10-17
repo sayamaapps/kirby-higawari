@@ -17,7 +17,8 @@ require_once __DIR__ . '/src/Daily.php';
  * snippet prints nothing.
  *
  * Nothing here accepts input from outside the Panel. Changing a menu by chat
- * is the job of the separate package Fude (see examples/fude.php).
+ * is the job of the separate package Fude, which reads the `fude:` marker in
+ * blueprints/fields/dishes.yml.
  */
 
 $higawariTranslations = [];
