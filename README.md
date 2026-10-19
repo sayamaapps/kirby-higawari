@@ -6,7 +6,7 @@ Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is
 - **The Panel.** A tab with the date and up to five dishes (name, further lines, price, markers). Dish names are the only required text.
 - **Plain output.** One snippet with semantic HTML and `higawari-*` classes. No JavaScript, no request to another server, no cookie.
 - **Optional text when nothing is valid.** Either nothing, or a sentence of your choice.
-- **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/simsimmal/kirby-fude), which reads the marker in the dishes blueprint (see below).
+- **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/sayamaapps/kirby-fude), which reads the marker in the dishes blueprint (see below).
 
 Code, comments and this README are in English. The Panel texts and the snippet texts are in German and English.
 
@@ -24,7 +24,7 @@ composer require sayamaapps/kirby-higawari
 Composer installs the plugin into `site/plugins/higawari/`. Until the package is on Packagist, add the repository first:
 
 ```json
-"repositories": [{ "type": "vcs", "url": "https://github.com/simsimmal/kirby-higawari" }]
+"repositories": [{ "type": "vcs", "url": "https://github.com/sayamaapps/kirby-higawari" }]
 ```
 
 Off by default. Switch it on in `site/config/config.php`:
@@ -79,7 +79,7 @@ Reading rules, the same for the Panel content and imported data: a dish without 
 
 ### Left out on purpose
 
-- **Weekend and closing-day rules.** Neither source has them in the menu logic. Opening hours are another package's job ([Noren](https://github.com/simsimmal/kirby-noren)).
+- **Weekend and closing-day rules.** Neither source has them in the menu logic. Opening hours are another package's job ([Noren](https://github.com/sayamaapps/kirby-noren)).
 - **Chat, Telegram, a Hermes plugin and a bot role.** Changes by chat are Fude's job.
 - **"Tageskarte leeren" as a Panel button.** The clearing itself is here (see below). The button needs a dialog in the site's own Panel area, which only the site can define.
 - **The picture beside the menu**, and its layout. Those are site design.
