@@ -11,6 +11,16 @@ All notable changes to this project are documented here. Versions follow
   **[privacy text]**. Every site using the plugin must then review its privacy
   policy.
 
+## [1.2.0] — 2026-10-20
+
+### Changed
+
+- **The Fude marker allows reading a photo of the menu.** The dishes field
+  sets `readImages: true`, so a chat side may read a photo of the blackboard
+  and propose its dishes as the new menu, as a draft that someone confirms.
+  Needs Fude 1.3 or later; `composer.json` now conflicts with older versions,
+  which refuse the unknown marker option.
+
 ## [1.1.0] — 2026-10-17
 
 ### Changed
