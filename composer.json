@@ -21,7 +21,7 @@
         "getkirby/composer-installer": "^1.2"
     },
     "conflict": {
-        "sayamaapps/kirby-fude": "<1.2"
+        "sayamaapps/kirby-fude": "<1.3"
     },
     "require-dev": {
         "getkirby/cms": "^5.0"

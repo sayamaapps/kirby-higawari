@@ -65,6 +65,7 @@ higawari_with_site([], function (string $tmp) {
     expect(['replace', 'update', 'delete'], $marker['actions'] ?? null, 'Fude marker: replace, update, delete');
     expect(Menu::MAX_DISHES, $marker['maxEntries'] ?? null, 'Fude marker: at most Menu::MAX_DISHES');
     expect(['field' => Menu::FIELD_DATE, 'value' => 'today'], $marker['touch'] ?? null, 'Fude marker: every change stamps the date field');
+    expect(true, $marker['readImages'] ?? null, 'Fude marker: a photo of the menu may be read');
 });
 
 finish('Higawari Blueprints');

@@ -154,7 +154,7 @@ $page->update(Menu::CLEARED);   // all dishes and the date, in one step
 
 ## Fude
 
-The dishes field carries a `fude:` marker, so a site with Fude 1.2 or later gets the menu as a chat collection without a line in `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish (at most five), and every change sets `tageskarteDatum` to today. `touch` stamps the day in Fude's `fude.timezone` (default Europe/Berlin). Without Fude, Kirby ignores the marker.
+The dishes field carries a `fude:` marker, so a site with Fude 1.3 or later gets the menu as a chat collection without a line in `site/config/fude.php`: a bot may replace the whole menu, update or delete a dish (at most five), and every change sets `tageskarteDatum` to today. The marker sets `readImages`, so the chat side may read a photo of the blackboard as the new menu; the dishes on it still arrive as a draft that someone confirms. `touch` stamps the day in Fude's `fude.timezone` (default Europe/Berlin). Without Fude, Kirby ignores the marker.
 
 - The collection is named `<page id>-tagesgerichte`, for example `home-tagesgerichte`.
 - The page needs both fields, as the tab brings them. A blueprint that extends only `higawari/fields/dishes` makes every Fude route fail, because the date to stamp is missing.
