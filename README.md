@@ -162,7 +162,7 @@ The dishes field carries a `fude:` marker, so a site with Fude 1.3 or later gets
 
 ## Privacy
 
-Higawari sets no cookies, uses no browser storage, makes no request to a third party and processes no visitor data. The menu is computed on your server for each request from the content you enter. [PRIVACY.md](PRIVACY.md) describes the implementation in English, and [DATENSCHUTZ.md](DATENSCHUTZ.md) holds the German text block for a privacy policy. Both are not legal advice.
+Higawari processes no visitor data: it sets no cookies, uses no browser storage and makes no request to a third party. There is nothing to add to a site's privacy policy.
 
 ## Development
 
