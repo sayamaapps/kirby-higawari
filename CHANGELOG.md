@@ -8,7 +8,19 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
-## [Unreleased]
+## [1.3.0] — 2026-10-21
+
+### Added
+
+- **The chat may choose the day** (Fude 1.4, `touch` with `editable: true`).
+  A draft can set `tageskarteDatum` to another day than today, such as the menu
+  for tomorrow; never a past day. Without a day it stays today. The bot reads
+  what the date means from the field's label and help text ("Gilt am").
+
+### Changed
+
+- **`conflict` with `sayamaapps/kirby-fude` < 1.4** (was < 1.3): older Fude
+  versions ignore `editable` silently.
 
 ### Removed
 

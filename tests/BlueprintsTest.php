@@ -64,7 +64,7 @@ higawari_with_site([], function (string $tmp) {
     $marker = higawari_kirby($tmp)->page('home')->blueprint()->fields()[Menu::FIELD_DISHES]['fude'] ?? null;
     expect(['replace', 'update', 'delete'], $marker['actions'] ?? null, 'Fude marker: replace, update, delete');
     expect(Menu::MAX_DISHES, $marker['maxEntries'] ?? null, 'Fude marker: at most Menu::MAX_DISHES');
-    expect(['field' => Menu::FIELD_DATE, 'value' => 'today'], $marker['touch'] ?? null, 'Fude marker: every change stamps the date field');
+    expect(['field' => Menu::FIELD_DATE, 'value' => 'today', 'editable' => true], $marker['touch'] ?? null, 'Fude marker: every change stamps the date field, the chat may name another day');
     expect(true, $marker['readImages'] ?? null, 'Fude marker: a photo of the menu may be read');
 });
 
