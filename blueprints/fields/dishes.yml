@@ -5,14 +5,15 @@ label: higawari.panel.dishes.label
 type: structure
 max: 5
 # For the separate package Fude (changes by chat): a bot may replace the whole
-# menu, update or delete a dish, and every change sets the date to today.
+# menu, update or delete a dish, and every change sets the date: today, or
+# another day the chat names (editable, "the menu for tomorrow"), never a past one.
 # readImages: the chat side may read a photo of the blackboard as the menu.
-# Needs Fude 1.3 or later. Kirby ignores the key when Fude is not installed.
+# Needs Fude 1.4 or later. Kirby ignores the key when Fude is not installed.
 fude:
   description: Today's dishes. Each change replaces the whole menu.
   actions: [replace, update, delete]
   maxEntries: 5
-  touch: {field: tageskarteDatum, value: today}
+  touch: {field: tageskarteDatum, value: today, editable: true}
   readImages: true
 columns:
   gericht:
