@@ -79,8 +79,8 @@ Reading rules, the same for the Panel content and imported data: a dish without 
 
 ### Left out on purpose
 
-- **Weekend and closing-day rules.** Neither source has them in the menu logic. Opening hours are another package's job ([Noren](https://github.com/sayamaapps/kirby-noren)).
-- **Chat, Telegram, a Hermes plugin and a bot role.** Changes by chat are Fude's job.
+- **Weekend and closing-day rules.** The menu logic has none. Opening hours are another package's job ([Noren](https://github.com/sayamaapps/kirby-noren)).
+- **Chat, bots and write endpoints.** Changes by chat are Fude's job.
 - **"Tageskarte leeren" as a Panel button.** The clearing itself is here (see below). The button needs a dialog in the site's own Panel area, which only the site can define.
 - **The picture beside the menu**, and its layout. Those are site design.
 

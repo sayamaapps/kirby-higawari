@@ -52,8 +52,7 @@ All notable changes to this project are documented here. Versions follow
 
 ## [1.0.0] — 2026-10-11
 
-First release. Built from the daily menus of two existing sites, generalised
-into one package.
+First release. Built for the daily menus of small restaurant sites.
 
 ### Added
 
