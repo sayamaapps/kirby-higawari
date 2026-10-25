@@ -8,6 +8,19 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.4.0] — 2026-10-25
+
+### Added
+
+- **Date mode `until`** (`sayamaapps.higawari.dateMode`, default `from`). The
+  date can be the last day a menu is shown ("Anzeigen bis") instead of the
+  first ("Gilt am"). The menu is then shown on every day up to and including
+  the date; `days` does not apply. The Panel label, help and tab info, the
+  snippet line ("Bis einschließlich …") and the `from` of the page method (today)
+  follow the mode. Sites on the default need no change.
+- New texts: `snippet.until`, `panel.date.until.label`, `panel.date.until.help`,
+  `panel.info.until.text`, in German and English.
+
 ## [1.3.0] — 2026-10-21
 
 ### Added

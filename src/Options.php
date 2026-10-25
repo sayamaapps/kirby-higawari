@@ -41,7 +41,10 @@ final class Options
         return self::get($kirby, 'active', false) === true;
     }
 
-    /** `sayamaapps.higawari.days`: how many days a menu is shown, counted from its date. Default 1 (the day itself). */
+    /**
+     * `sayamaapps.higawari.days`: how many days a menu is shown, counted from its date. Default 1 (the day itself).
+     * Only read in mode `from`; the caller skips it in mode `until`.
+     */
     public static function days(App $kirby): int
     {
         $value = self::get($kirby, 'days', self::DEFAULT_DAYS);
@@ -50,6 +53,20 @@ final class Options
         }
         self::invalid($kirby, 'Higawari: sayamaapps.higawari.days must be a whole number from 1 to ' . self::MAX_DAYS . ' — using ' . self::DEFAULT_DAYS . '.');
         return self::DEFAULT_DAYS;
+    }
+
+    /**
+     * `sayamaapps.higawari.dateMode`: `from` (default) or `until`, see Menu::MODE_*.
+     * Any other value is reported and `from` is used.
+     */
+    public static function dateMode(App $kirby): string
+    {
+        $value = self::get($kirby, 'dateMode', Menu::MODE_FROM);
+        if (is_string($value) && in_array($value, Menu::MODES, true)) {
+            return $value;
+        }
+        self::invalid($kirby, 'Higawari: sayamaapps.higawari.dateMode must be "from" or "until" — using "from".');
+        return Menu::MODE_FROM;
     }
 
     /** `sayamaapps.higawari.timezone`, default Europe/Berlin. Any zone PHP accepts. */

@@ -16,12 +16,16 @@ return [
     'snippet.heading' => 'Tageskarte',
     'snippet.range' => '{from} – {to}',
     'snippet.markers' => 'Kennzeichnungen: {markers}',
+    'snippet.until' => 'Bis einschließlich {date}',
 
     // Texte im Panel.
     'panel.tab.label' => 'Tageskarte',
     'panel.info.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird an diesem Tag gezeigt (oder an so vielen Tagen, wie die Website festlegt). Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
+    'panel.info.until.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
     'panel.date.label' => 'Gilt am',
     'panel.date.help' => 'Der Tag, an dem die Gerichte serviert werden. Leer: es wird nichts gezeigt.',
+    'panel.date.until.label' => 'Anzeigen bis',
+    'panel.date.until.help' => 'Der letzte Tag, an dem die Gerichte gezeigt werden, dieser Tag eingeschlossen. Leer: es wird nichts gezeigt.',
     'panel.dishes.label' => 'Gerichte',
     'panel.dish.name.label' => 'Gericht',
     'panel.dish.description.label' => 'Weitere Zeilen (optional)',
