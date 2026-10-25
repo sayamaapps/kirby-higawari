@@ -107,6 +107,50 @@ I18n::setLanguage('en');
 expect('Saturday, 10 October 2026', Menu::displayDate('2026-10-10'), 'English weekday and date');
 I18n::setLanguage('de');
 
+// Mode until: the date is the last day shown, there is no first day, days are ignored.
+$until = Menu::MODE_UNTIL;
+expect(['from' => null, 'to' => '2026-10-30'], Menu::window('2026-10-30', 3, $zone, $until), 'until: no first day, the date is the last day');
+expect(true, Menu::validOn('2026-10-30', at('2026-10-30 12:00'), 1, $zone, $until), 'until: shown on the date itself');
+expect(true, Menu::validOn('2026-10-30', at('2026-10-30 23:59:59'), 1, $zone, $until), 'until: shown until 23:59:59 of the date');
+expect(true, Menu::validOn('2026-10-30', at('2026-10-01 08:00'), 1, $zone, $until), 'until: shown long before the date (no first day)');
+expect(false, Menu::validOn('2026-10-30', at('2026-10-31 00:00'), 1, $zone, $until), 'until: not the day after the date');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-11 12:00'), 1, $zone, $until), 'until: a past date (yesterday) is not shown');
+expect(true, Menu::validOn('2026-10-25', at('2026-10-25 12:00'), 1, $zone, $until), 'until: a date of today is shown today');
+expect(false, Menu::validOn('', at('2026-10-25 12:00'), 1, $zone, $until), 'until: no date, never shown');
+expect(false, Menu::validOn('2026-02-31', at('2026-02-01 12:00'), 1, $zone, $until), 'until: impossible date, never shown');
+expect(true, Menu::validOn('2026-10-10', at('2026-10-10 12:00'), 5, $zone, $until), 'until: days=5 is ignored, the date itself is still the last day');
+expect(false, Menu::validOn('2026-10-10', at('2026-10-11 12:00'), 5, $zone, $until), 'until: days=5 does not extend the last day');
+expect(true, Menu::validOn('2026-10-10', at('2026-10-10 12:00'), 0, $zone, $until), 'until: days=0 does not matter');
+// Time zones in mode until: the last day is the zone's day.
+expect(true, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-10T21:59:59Z'), 1, $zone, $until), 'until: 23:59:59 in Berlin is still the 10th');
+expect(false, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-10T22:00:00Z'), 1, $zone, $until), 'until: 22:00 UTC is midnight in Berlin, the 11th');
+expect(true, Menu::validOn('2026-10-10', new DateTimeImmutable('2026-10-10T22:00:00Z'), 1, 'UTC', $until), 'until: in UTC the same instant is still the 10th');
+// Card in mode until: from is today in the zone, to is the date.
+expect(
+    ['from' => '2026-10-25', 'to' => '2026-10-30', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+    Menu::card('2026-10-30', $rows, at('2026-10-25 12:00'), 1, $zone, '€', $until),
+    'until: card runs from today to the date',
+);
+expect(
+    ['from' => '2026-10-26', 'to' => '2026-10-26', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+    Menu::card('2026-10-26', $rows, new DateTimeImmutable('2026-10-25T23:30:00Z'), 1, $zone, '€', $until),
+    'until: from is the zone\'s day (00:30 on 26.10. in Berlin)',
+);
+expect(
+    '2026-10-25',
+    Menu::card('2026-10-26', $rows, new DateTimeImmutable('2026-10-25T23:30:00Z'), 1, 'UTC', '€', $until)['from'],
+    'until: the same instant is still the 25th in UTC',
+);
+expect(null, Menu::card('2026-10-24', $rows, at('2026-10-25 12:00'), 1, $zone, '€', $until), 'until: no card after the date');
+expect(null, Menu::card('', $rows, at('2026-10-25 12:00'), 1, $zone, '€', $until), 'until: no card without a date');
+expect(null, Menu::card('2026-10-30', [['gericht' => '']], at('2026-10-25 12:00'), 1, $zone, '€', $until), 'until: no card without a usable dish');
+// Label in mode until: the last day only.
+expect('Bis einschließlich Freitag, 30.10.2026', Menu::label('2026-10-25', '2026-10-30', $until), 'until: German label');
+I18n::setLanguage('en');
+expect('Until Friday, 30 October 2026', Menu::label('2026-10-25', '2026-10-30', $until), 'until: English label');
+I18n::setLanguage('de');
+expect('Samstag, 10.10.2026', Menu::label('2026-10-10', '2026-10-10', Menu::MODE_FROM), 'from: label unchanged by the mode argument');
+
 // Clearing empties dishes and date together.
 expect(['tagesgerichte' => [], 'tageskarteDatum' => ''], Menu::CLEARED, 'CLEARED');
 

@@ -109,6 +109,8 @@ function higawari_with_site(array $fields, callable $run): void
 function higawari_kirby(string $tmp, array $options = []): Kirby\Cms\App
 {
     Kirby\Template\Snippet::$cache = [];
+    // Kirby keeps loaded blueprints per process; the Panel blueprints depend on the options.
+    Kirby\Cms\Blueprint::$loaded = [];
     return new Kirby\Cms\App([
         'roots' => [
             'base' => $tmp,

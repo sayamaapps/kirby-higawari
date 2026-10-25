@@ -42,7 +42,8 @@ All options are read as `sayamaapps.higawari.<name>`, flat or nested. `null` cou
 | Option | Default | Meaning |
 |---|---|---|
 | `active` | `false` | Master switch. Only a real `true` switches it on. |
-| `days` | `1` | How many days a menu is shown, counted from its date: `1` is the day itself, `3` is the date and the two days after. From 1 to 366. |
+| `days` | `1` | How many days a menu is shown, counted from its date: `1` is the day itself, `3` is the date and the two days after. From 1 to 366. Only in mode `from`; mode `until` ignores it. |
+| `dateMode` | `from` | What the date means, see [Two date modes](#two-date-modes). `from`: the first day, shown for `days` days. `until`: the last day ("Anzeigen bis"). Any other value is reported and `from` is used. |
 | `timezone` | `Europe/Berlin` | The zone in which "today" is decided. |
 | `currency` | `€` | Shown after a price, with a space: `7,50 €`. An empty string shows bare numbers: `7,50`. |
 | `emptyText` | `null` | Shown in place of the menu when none is valid. `null` shows nothing. |
@@ -55,7 +56,7 @@ The Panel tab writes two fields. Their names are a compatibility promise: sites 
 
 | Field | Type | Meaning |
 |---|---|---|
-| `tageskarteDatum` | date | "Gilt am": the day the menu is valid on. Empty: nothing is shown. |
+| `tageskarteDatum` | date | "Gilt am", in mode `until` "Anzeigen bis": the day the menu is valid on, or with `dateMode` `until` the last day it is shown. Empty: nothing is shown. |
 | `tagesgerichte` | structure, max. 5 | The dishes (see below). |
 
 Dish fields:
@@ -68,6 +69,13 @@ Dish fields:
 | `kennzeichnungen` | text, max. 40 | Optional markers, shown as written. |
 
 Reading rules, the same for the Panel content and imported data: a dish without a name is dropped; a price that cannot be read (`abc`, `1000`, `12.345`) drops the dish rather than showing a wrong amount; a decimal comma and a decimal point both work; at most five dishes are shown, in order.
+
+### Two date modes
+
+- **`from`** (default): the date is the first day. The menu is shown on it and on the `days` − 1 days after it.
+- **`until`**: the date is the last day. The menu is shown on every day up to and including it, with no first day, so a card entered "until Friday" is visible at once and disappears after Friday. `days` does not apply.
+
+Switching the mode changes the meaning of the stored date, not the content: a site that moves from `from` to `until` has to re-enter the dates that should now mean "until".
 
 ### Why these fields
 
@@ -95,7 +103,7 @@ tabs:
     extends: higawari/tabs/daily-menu
 ```
 
-Pieces for your own blueprints: `higawari/tabs/daily-menu` (the tab), `higawari/fields/date` and `higawari/fields/dishes`.
+Pieces for your own blueprints: `higawari/tabs/daily-menu` (the tab), `higawari/fields/date` and `higawari/fields/dishes`. The tab and the date show the texts of the configured `dateMode`, so the same blueprint works in both modes.
 
 ## Snippet
 
@@ -125,6 +133,8 @@ Markup, with classes only and no inline style:
 </section>
 ```
 
+With `dateMode` `until`, the line reads `Bis einschließlich Samstag, 10.10.2026` (English: `Until Saturday, 10 October 2026`), and its `datetime` is the last day.
+
 With nothing valid, the snippet prints nothing, or only `<p class="higawari-leer">` with the `emptyText` option. Every value is escaped. The page is never cached by Kirby, because the menu depends on the clock. To change the markup, create `site/snippets/higawari.php`; Kirby uses it instead.
 
 No CSS is shipped. The classes are the hooks for your own stylesheet.
@@ -134,7 +144,7 @@ No CSS is shipped. The classes are the hooks for your own stylesheet.
 ```php
 $card = $page->higawariCard();                    // now, in the configured zone
 // [
-//     'from' => '2026-10-10', 'to' => '2026-10-10',
+//     'from' => '2026-10-10', 'to' => '2026-10-10',   // mode until: from is today, to the date
 //     'dishes' => [
 //         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'markers' => 'V, L'],
 //     ],
@@ -162,6 +172,7 @@ The dishes field carries a `fude:` marker, so a site with Fude 1.4 or later gets
 | **Asked** | — (the menu comes as one message or a photo; asking every day would slow it down) |
 | **Free** | `beschreibung`, `preis`, `kennzeichnungen` |
 
+- In mode `until` a change by chat without a named day sets the date to today, so the menu is shown until today only. The bot names the last day ("bis Freitag").
 - The collection is named `<page id>-tagesgerichte`, for example `home-tagesgerichte`.
 - The page needs both fields, as the tab brings them. A blueprint that extends only `higawari/fields/dishes` makes every Fude route fail, because the date to stamp is missing.
 - To switch it off, or to change it, use Fude's overrides in `site/config/fude.php`: `'home-tagesgerichte' => false` removes the collection, an array under the same name replaces it.

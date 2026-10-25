@@ -22,6 +22,7 @@ if (!Options::active(kirby())) {
     return;
 }
 Options::applyLanguage(kirby());
+$mode = Options::dateMode(kirby());
 
 // The menu changes with the clock: Kirby's page cache must not keep this page,
 // not even in the state where nothing is shown today.
@@ -40,7 +41,7 @@ $note = Options::note(kirby());
 <section class="higawari" aria-labelledby="higawari-titel">
   <h2 class="higawari-titel" id="higawari-titel"><?= esc(I18n::t('snippet.heading')) ?></h2>
 <?php if ($card !== null) : ?>
-  <p class="higawari-gilt"><time datetime="<?= esc($card['from']) ?>"><?= esc(Menu::label($card['from'], $card['to'])) ?></time></p>
+  <p class="higawari-gilt"><time datetime="<?= esc($mode === Menu::MODE_UNTIL ? $card['to'] : $card['from']) ?>"><?= esc(Menu::label($card['from'], $card['to'], $mode)) ?></time></p>
   <ul class="higawari-gerichte">
 <?php foreach ($card['dishes'] as $dish) : ?>
     <li class="higawari-gericht">

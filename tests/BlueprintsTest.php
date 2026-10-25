@@ -59,6 +59,35 @@ higawari_with_site([], function (string $tmp) {
     }
 });
 
+// Mode until: the Panel says "Anzeigen bis" / "Shown until" with its own help, and the tab's info text follows.
+// Mode from (the default) keeps the texts above, also in the same process.
+higawari_with_site([], function (string $tmp) {
+    $texts = [
+        'de' => ['Anzeigen bis', 'Der letzte Tag, an dem die Gerichte gezeigt werden, dieser Tag eingeschlossen. Leer: es wird nichts gezeigt.', 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.'],
+        'en' => ['Shown until', 'The last day the dishes are shown, that day included. Empty: nothing is shown.', 'Pick the last day and enter the dishes, then save. The menu is shown up to and including that day. Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.'],
+    ];
+    foreach ($texts as $language => [$label, $help, $info]) {
+        $kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.dateMode' => 'until']);
+        $kirby->setCurrentTranslation($language);
+        $page = $kirby->page('home');
+
+        $fields = Form::for($page, ['values' => []])->fields()->toArray();
+        expect($label, $fields['tageskartedatum']['label'] ?? null, "until $language: date label");
+        expect('<p>' . $help . '</p>', $fields['tageskartedatum']['help'] ?? null, "until $language: date help (Kirby wraps help in a paragraph)");
+        expect('date', $fields['tageskartedatum']['type'] ?? null, "until $language: still a date field");
+        expect('<p>' . $info . '</p>', $fields['higawariinfo']['text'] ?? null, "until $language: tab info text");
+
+        // Fude translates the raw blueprint label itself, so the bot reads "Anzeigen bis" / "Shown until".
+        $raw = $page->blueprint()->fields()['tageskarteDatum'];
+        expect($label, \Kirby\Toolkit\I18n::translate($raw['label'], $raw['label'], $language), "until $language: label as Fude reads it");
+    }
+
+    $kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true]);
+    $kirby->setCurrentTranslation('de');
+    $fields = Form::for($kirby->page('home'), ['values' => []])->fields()->toArray();
+    expect('Gilt am', $fields['tageskartedatum']['label'] ?? null, 'from: label back to "Gilt am" after an until run');
+});
+
 // What Fude reads: replace the whole menu, stamp the date, never more than Menu allows.
 higawari_with_site([], function (string $tmp) {
     $marker = higawari_kirby($tmp)->page('home')->blueprint()->fields()[Menu::FIELD_DISHES]['fude'] ?? null;

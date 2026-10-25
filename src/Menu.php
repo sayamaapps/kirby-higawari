@@ -10,8 +10,9 @@ use DateTimeZone;
  *
  * A menu is one date (`tageskarteDatum`, the day it is valid on) and up to
  * five dishes (`tagesgerichte`). It is shown on every day of its window: the
- * date itself, or `sayamaapps.higawari.days` days counted from it. Without a
- * date nothing is shown, so a forgotten card cannot linger for weeks.
+ * date itself, or `sayamaapps.higawari.days` days counted from it. In mode
+ * `until` the date is the last day instead, and the window has no first day.
+ * Without a date nothing is shown, so a forgotten card cannot linger for weeks.
  *
  * Rules: every price passes the same check, at most five dishes are shown,
  * clearing removes the date and all dishes together, the label shows one date
@@ -30,6 +31,15 @@ final class Menu
     public const DEFAULT_TIMEZONE = 'Europe/Berlin';
 
     /**
+     * What the date means (`sayamaapps.higawari.dateMode`). `from`: the first
+     * day, the menu is shown for `days` days from it. `until`: the last day,
+     * the menu is shown on every day up to and including it, `days` ignored.
+     */
+    public const MODE_FROM = 'from';
+    public const MODE_UNTIL = 'until';
+    public const MODES = [self::MODE_FROM, self::MODE_UNTIL];
+
+    /**
      * What “clear the menu” writes: all dishes and the date together. Keeping
      * the date would hide a card entered the next day, because the old date
      * has already passed.
@@ -46,20 +56,27 @@ final class Menu
 
     /**
      * First and last day (inclusive, Y-m-d) on which a menu dated $date is
-     * shown: `$days` days counted from that date. Null for an invalid date or
-     * fewer than one day.
+     * shown. Mode `from`: `$days` days counted from that date, and fewer than
+     * one day gives null. Mode `until`: no first day (`from` is null), the
+     * last day is $date, and `$days` is not used.
      *
-     * @return array{from: string, to: string}|null
+     * @return array{from: string|null, to: string}|null
      */
-    public static function window(string $date, int $days, string $timezone = self::DEFAULT_TIMEZONE): ?array
+    public static function window(string $date, int $days, string $timezone = self::DEFAULT_TIMEZONE, string $mode = self::MODE_FROM): ?array
     {
-        if ($days < 1 || !self::isDate($date)) {
+        if (!self::isDate($date)) {
             return null;
         }
-        $from = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone($timezone));
+        $day = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone($timezone));
+        if ($mode === self::MODE_UNTIL) {
+            return ['from' => null, 'to' => $day->format('Y-m-d')];
+        }
+        if ($days < 1) {
+            return null;
+        }
         return [
-            'from' => $from->format('Y-m-d'),
-            'to' => $from->modify('+' . ($days - 1) . ' days')->format('Y-m-d'),
+            'from' => $day->format('Y-m-d'),
+            'to' => $day->modify('+' . ($days - 1) . ' days')->format('Y-m-d'),
         ];
     }
 
@@ -67,14 +84,14 @@ final class Menu
      * Is a menu dated $date shown at $now? The day is taken in $timezone, so
      * 00:30 on the 10th in Berlin is the 10th even if it is still the 9th in UTC.
      */
-    public static function validOn(string $date, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE): bool
+    public static function validOn(string $date, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE, string $mode = self::MODE_FROM): bool
     {
-        $window = self::window($date, $days, $timezone);
+        $window = self::window($date, $days, $timezone, $mode);
         if ($window === null) {
             return false;
         }
         $today = $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
-        return $today >= $window['from'] && $today <= $window['to'];
+        return ($window['from'] === null || $today >= $window['from']) && $today <= $window['to'];
     }
 
     /**
@@ -137,22 +154,24 @@ final class Menu
 
     /**
      * The card to show at $now, or null when the menu is not valid that day or
-     * has no usable dish.
+     * has no usable dish. In mode `until` `from` is today (in $timezone): the
+     * card starts being shown on the day it is read.
      *
      * @param list<array<string, mixed>> $rows
      * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string}>}|null
      */
-    public static function card(string $date, array $rows, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE, string $currency = '€'): ?array
+    public static function card(string $date, array $rows, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE, string $currency = '€', string $mode = self::MODE_FROM): ?array
     {
-        if (!self::validOn($date, $now, $days, $timezone)) {
+        if (!self::validOn($date, $now, $days, $timezone, $mode)) {
             return null;
         }
         $dishes = self::dishes($rows, $currency);
         if ($dishes === []) {
             return null;
         }
-        $window = self::window($date, $days, $timezone);
-        return ['from' => $window['from'], 'to' => $window['to'], 'dishes' => $dishes];
+        $window = self::window($date, $days, $timezone, $mode);
+        $from = $window['from'] ?? $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
+        return ['from' => $from, 'to' => $window['to'], 'dishes' => $dishes];
     }
 
     /** „Samstag, 10.10.2026“ (German) or „Saturday, 10 October 2026“. Invalid date gives ''. */
@@ -165,9 +184,15 @@ final class Menu
         return I18n::day((int) $day->format('N')) . ', ' . $day->format(I18n::t('format.date'));
     }
 
-    /** The label above a card: one date, or „from – to“ for a multi-day window. */
-    public static function label(string $from, string $to): string
+    /**
+     * The label above a card: one date, or „from – to“ for a multi-day window.
+     * Mode `until`: „Bis einschließlich Freitag, 30.10.2026“ (the last day only).
+     */
+    public static function label(string $from, string $to, string $mode = self::MODE_FROM): string
     {
+        if ($mode === self::MODE_UNTIL) {
+            return I18n::t('snippet.until', ['date' => self::displayDate($to)]);
+        }
         $first = self::displayDate($from);
         if ($from === $to) {
             return $first;

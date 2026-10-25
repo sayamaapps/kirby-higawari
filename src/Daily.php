@@ -28,13 +28,16 @@ final class Daily
         }
         $zone = Options::timezone($kirby);
         $now ??= new DateTimeImmutable('now', new DateTimeZone($zone));
+        $mode = Options::dateMode($kirby);
         return Menu::card(
             (string) $page->{Menu::FIELD_DATE}()->value(),
             $page->{Menu::FIELD_DISHES}()->yaml(),
             $now,
-            Options::days($kirby),
+            // `days` only counts in mode `from`; in mode `until` it is not read at all.
+            $mode === Menu::MODE_FROM ? Options::days($kirby) : Options::DEFAULT_DAYS,
             $zone,
             Options::currency($kirby),
+            $mode,
         );
     }
 }

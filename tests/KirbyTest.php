@@ -145,4 +145,61 @@ higawari_with_site(HIGAWARI_TEST_HOME, function (string $tmp) {
     expect(true, $fresh->higawariCard(at('2026-10-11 09:00')) !== null, 'after clearing: a new menu is shown on its day');
 });
 
+// Mode until: the date is the last day shown (Anzeigen bis), no first day, days ignored.
+higawari_with_site(HIGAWARI_TEST_HOME, function (string $tmp) use ($noon, $nextDay) {
+    $until = HIGAWARI_TEST_ON + ['sayamaapps.higawari.dateMode' => 'until'];
+    $earlier = at('2026-10-08 12:00');
+
+    $kirby = higawari_kirby($tmp, $until);
+    $page = $kirby->page('home');
+    $html = higawari_render($kirby, ['source' => $page, 'now' => $earlier]);
+    holds(str_contains($html, '<time datetime="2026-10-10">Bis einschließlich Samstag, 10.10.2026</time>'), 'until: German line with the last day, datetime is the last day');
+    holds(!str_contains($html, ' – '), 'until: no from-to range');
+    expect(3, substr_count($html, '<li class="higawari-gericht">'), 'until: shown already before the date');
+    $card = $page->higawariCard($earlier);
+    expect(['2026-10-08', '2026-10-10'], [$card['from'], $card['to']], 'until: page method: from is today, to is the date');
+    expect('', higawari_render($kirby, ['source' => $page, 'now' => $nextDay]), 'until: nothing on the day after the date');
+    expect(null, $page->higawariCard($nextDay), 'until: page method null after the date');
+
+    // days is ignored: a broken value is not even read, and days=3 does not extend the last day.
+    $kirby = higawari_kirby($tmp, $until + ['debug' => true, 'sayamaapps.higawari.days' => 'drei']);
+    holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), 'higawari-gericht'), 'until: a broken days value is not read (debug on)');
+    $kirby = higawari_kirby($tmp, $until + ['sayamaapps.higawari.days' => 3]);
+    expect('', higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), 'until: days=3 does not extend the last day');
+
+    // A date of today: shown today.
+    $kirby = higawari_kirby($tmp, $until);
+    holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => at('2026-10-10 23:59:59')]), 'Bis einschließlich Samstag, 10.10.2026'), 'until: last second of the date');
+
+    // English line.
+    $kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.language' => 'en', 'sayamaapps.higawari.dateMode' => 'until']);
+    $html = higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $earlier]);
+    holds(str_contains($html, '<time datetime="2026-10-10">Until Saturday, 10 October 2026</time>'), 'until: English line');
+
+    // emptyText after the last day, as in mode from.
+    $kirby = higawari_kirby($tmp, $until + ['sayamaapps.higawari.emptyText' => 'Keine Karte.']);
+    holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), '<p class="higawari-leer">Keine Karte.</p>'), 'until: emptyText after the last day');
+
+    // A broken dateMode: debug throws, otherwise it is reported and `from` is used.
+    $kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['debug' => true, 'sayamaapps.higawari.dateMode' => 'bis']);
+    throws(InvalidArgumentException::class, fn () => Options::dateMode($kirby), 'debug: broken dateMode throws');
+    $log = sys_get_temp_dir() . '/higawari-test-' . bin2hex(random_bytes(4)) . '.log';
+    $previousLog = ini_get('error_log');
+    ini_set('error_log', $log);
+    $kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['sayamaapps.higawari.dateMode' => 'bis']);
+    expect('from', Options::dateMode($kirby), 'broken dateMode: from');
+    $html = higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]);
+    holds(str_contains($html, '<time datetime="2026-10-10">Samstag, 10.10.2026</time>'), 'broken dateMode: the from line');
+    expect('', higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), 'broken dateMode: from means only the day itself');
+    ini_set('error_log', (string) $previousLog);
+    holds(is_file($log) && str_contains((string) file_get_contents($log), 'sayamaapps.higawari.dateMode'), 'broken dateMode: reported to the error log');
+    if (is_file($log)) {
+        unlink($log);
+    }
+
+    // Mode from stays the default: the same page without the option.
+    $kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['sayamaapps.higawari.dateMode' => 'from']);
+    holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<time datetime="2026-10-10">Samstag, 10.10.2026</time>'), 'explicit from: unchanged line');
+});
+
 finish('Higawari Kirby');
