@@ -19,7 +19,7 @@ use Higawari\Menu;
 use Higawari\Options;
 
 if (!Options::active(kirby())) {
-    return;
+	return;
 }
 Options::applyLanguage(kirby());
 $mode = Options::dateMode(kirby());
@@ -34,7 +34,7 @@ $now ??= null;
 $card = $source !== null ? Daily::card(kirby(), $source, $now) : null;
 $empty = $card === null ? Options::emptyText(kirby()) : null;
 if ($card === null && $empty === null) {
-    return;
+	return;
 }
 $note = Options::note(kirby());
 ?>
