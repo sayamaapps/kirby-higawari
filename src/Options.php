@@ -4,6 +4,7 @@ namespace Sayamaapps\Higawari;
 
 use DateTimeZone;
 use Kirby\Cms\App;
+use Kirby\Cms\Helpers;
 
 /**
  * Reads `sayamaapps.higawari.*` options. `null` counts as "not set". Both
@@ -24,7 +25,9 @@ final class Options
 	public const DEFAULT_CURRENCY = '€';
 	public const DEFAULT_DAYS = 1;
 	public const MAX_DAYS = 366;
+	/** Option prefix; the spelling `higawari.<key>` is read as a fallback until 2.0. */
 	public const PREFIX = 'sayamaapps.higawari.';
+	public const LEGACY_PREFIX = 'higawari.';
 
 	/** @var array<string, true> */
 	private static array $reported = [];
@@ -88,7 +91,40 @@ final class Options
 
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
-		return $kirby->option(self::PREFIX . $key) ?? $default;
+		$value = self::configured($kirby, self::PREFIX, $key);
+		if ($value !== null) {
+			return $value;
+		}
+
+		// The spelling without `sayamaapps.` still works, with a deprecation.
+		$legacy = self::configured($kirby, self::LEGACY_PREFIX, $key);
+		if ($legacy !== null) {
+			Helpers::deprecated(
+				'Higawari: higawari.' . $key . ' is deprecated, use ' . self::PREFIX . $key,
+				'option-prefix'
+			);
+		}
+
+		return $legacy ?? $default;
+	}
+
+	/**
+	 * The value of `<prefix><key>` in any spelling the site config may use: the
+	 * flat key, the dotted prefix key where the plugin's `options` defaults are
+	 * stored, or the nested array. Kirby's option() stops at the dotted prefix
+	 * key, which holds the null defaults, and never reaches a nested setting.
+	 */
+	private static function configured(App $kirby, string $prefix, string $key): mixed
+	{
+		$options = $kirby->options();
+		$dotted = rtrim($prefix, '.');
+
+		$nested = $options;
+		foreach (explode('.', $dotted) as $segment) {
+			$nested = $nested[$segment] ?? null;
+		}
+
+		return $options[$prefix . $key] ?? $options[$dotted][$key] ?? $nested[$key] ?? null;
 	}
 
 	/**

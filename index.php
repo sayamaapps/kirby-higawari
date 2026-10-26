@@ -22,6 +22,7 @@ require_once __DIR__ . '/legacy.php';
 Kirby::plugin(
 	name: 'sayamaapps/higawari',
 	extends: [
+		'options'      => require __DIR__ . '/config/options.php',
 		'translations' => require __DIR__ . '/config/translations.php',
 		'snippets'     => require __DIR__ . '/config/snippets.php',
 		'blueprints'   => require __DIR__ . '/config/blueprints.php',
