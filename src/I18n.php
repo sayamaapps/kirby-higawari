@@ -10,6 +10,12 @@ namespace Sayamaapps\Higawari;
  *
  * The language is set once per request (Options::applyLanguage()) and
  * defaults to English. Missing keys fall back to English, then to the key.
+ *
+ * @package   Kirby Higawari
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-higawari
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class I18n
 {
@@ -27,11 +33,13 @@ final class I18n
 		return self::t('day.' . $isoWeekday);
 	}
 
+	/** The language currently in use. */
 	public static function language(): string
 	{
 		return self::$language;
 	}
 
+	/** Sets the language for this request. Unknown languages fall back to English. */
 	public static function setLanguage(string $language): void
 	{
 		self::$language = in_array($language, self::LANGUAGES, true) ? $language : 'en';

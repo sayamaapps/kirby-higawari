@@ -11,6 +11,12 @@ use Kirby\Cms\Page;
  * The Kirby side of the menu: reads a page's fields and asks Menu for the card.
  * Not unit-tested on its own; tests/KirbyTest.php covers it through the page
  * method and the snippet.
+ *
+ * @package   Kirby Higawari
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-higawari
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Daily
 {

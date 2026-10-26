@@ -19,6 +19,12 @@ use Kirby\Cms\Helpers;
  * Defaults are given here and at the call sites, never in an `options` block
  * of the plugin (Kirby would file them under sayamaapps.higawari.* anyway,
  * but the README documents one place to look).
+ *
+ * @package   Kirby Higawari
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-higawari
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Options
 {
@@ -79,7 +85,11 @@ final class Options
 		if (is_int($value) && $value >= 1 && $value <= self::MAX_DAYS) {
 			return $value;
 		}
-		self::invalid($kirby, 'Higawari: sayamaapps.higawari.days must be a whole number from 1 to ' . self::MAX_DAYS . ' — using ' . self::DEFAULT_DAYS . '.');
+		self::invalid(
+			$kirby,
+			'Higawari: sayamaapps.higawari.days must be a whole number from 1 to '
+				. self::MAX_DAYS . ' — using ' . self::DEFAULT_DAYS . '.'
+		);
 		return self::DEFAULT_DAYS;
 	}
 
@@ -89,6 +99,10 @@ final class Options
 		return self::text($kirby, 'emptyText');
 	}
 
+	/**
+	 * Reads `<key>` from the new spelling, then the old one (with a deprecation).
+	 * Returns $default when neither is set.
+	 */
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
 		$value = self::configured($kirby, self::PREFIX, $key);
@@ -195,7 +209,11 @@ final class Options
 				// Reported below.
 			}
 		}
-		self::invalid($kirby, 'Higawari: unknown sayamaapps.higawari.timezone ' . var_export($zone, true) . ' — using ' . Menu::DEFAULT_TIMEZONE . '.');
+		self::invalid(
+			$kirby,
+			'Higawari: unknown sayamaapps.higawari.timezone ' . var_export($zone, true)
+				. ' — using ' . Menu::DEFAULT_TIMEZONE . '.'
+		);
 		return Menu::DEFAULT_TIMEZONE;
 	}
 }

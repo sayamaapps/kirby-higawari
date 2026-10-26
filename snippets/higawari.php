@@ -41,7 +41,11 @@ $note = Options::note(kirby());
 <section class="higawari" aria-labelledby="higawari-titel">
   <h2 class="higawari-titel" id="higawari-titel"><?= esc(I18n::t('snippet.heading')) ?></h2>
 <?php if ($card !== null) : ?>
-  <p class="higawari-gilt"><time datetime="<?= esc($mode === Menu::MODE_UNTIL ? $card['to'] : $card['from']) ?>"><?= esc(Menu::label($card['from'], $card['to'], $mode)) ?></time></p>
+<?php
+$datetime = $mode === Menu::MODE_UNTIL ? $card['to'] : $card['from'];
+$label = Menu::label($card['from'], $card['to'], $mode);
+?>
+  <p class="higawari-gilt"><time datetime="<?= esc($datetime) ?>"><?= esc($label) ?></time></p>
   <ul class="higawari-gerichte">
 <?php foreach ($card['dishes'] as $dish) : ?>
     <li class="higawari-gericht">
@@ -50,7 +54,8 @@ $note = Options::note(kirby());
       <span class="higawari-preis"><?= esc($dish['price']) ?></span>
 <?php endif ?>
 <?php if ($dish['lines'] !== []) : ?>
-      <p class="higawari-beschreibung"><?php foreach ($dish['lines'] as $index => $line) : ?><?= $index > 0 ? '<br>' : '' ?><?= esc($line) ?><?php endforeach ?></p>
+<?php $lines = array_map(static fn (string $line): string => esc($line), $dish['lines']) ?>
+      <p class="higawari-beschreibung"><?= implode('<br>', $lines) ?></p>
 <?php endif ?>
 <?php if ($dish['markers'] !== '') : ?>
       <p class="higawari-kennzeichnungen"><?= esc(I18n::t('snippet.markers', ['markers' => $dish['markers']])) ?></p>

@@ -18,6 +18,12 @@ use DateTimeZone;
  * clearing removes the date and all dishes together, the label shows one date
  * or a from-to range for a multi-day window, and a dish description may span
  * several lines.
+ *
+ * @package   Kirby Higawari
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-higawari
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Menu
 {
@@ -53,7 +59,15 @@ final class Menu
 	 * @param list<array<string, mixed>> $rows
 	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string}>}|null
 	 */
-	public static function card(string $date, array $rows, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE, string $currency = '€', string $mode = self::MODE_FROM): array|null
+	public static function card(
+		string $date,
+		array $rows,
+		DateTimeImmutable $now,
+		int $days = 1,
+		string $timezone = self::DEFAULT_TIMEZONE,
+		string $currency = '€',
+		string $mode = self::MODE_FROM
+	): array|null
 	{
 		if (!self::validOn($date, $now, $days, $timezone, $mode)) {
 			return null;
@@ -169,7 +183,13 @@ final class Menu
 	 * Is a menu dated $date shown at $now? The day is taken in $timezone, so
 	 * 00:30 on the 10th in Berlin is the 10th even if it is still the 9th in UTC.
 	 */
-	public static function validOn(string $date, DateTimeImmutable $now, int $days = 1, string $timezone = self::DEFAULT_TIMEZONE, string $mode = self::MODE_FROM): bool
+	public static function validOn(
+		string $date,
+		DateTimeImmutable $now,
+		int $days = 1,
+		string $timezone = self::DEFAULT_TIMEZONE,
+		string $mode = self::MODE_FROM
+	): bool
 	{
 		$window = self::window($date, $days, $timezone, $mode);
 		if ($window === null) {
@@ -187,7 +207,12 @@ final class Menu
 	 *
 	 * @return array{from: string|null, to: string}|null
 	 */
-	public static function window(string $date, int $days, string $timezone = self::DEFAULT_TIMEZONE, string $mode = self::MODE_FROM): array|null
+	public static function window(
+		string $date,
+		int $days,
+		string $timezone = self::DEFAULT_TIMEZONE,
+		string $mode = self::MODE_FROM
+	): array|null
 	{
 		if (!self::isDate($date)) {
 			return null;

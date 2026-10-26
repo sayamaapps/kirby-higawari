@@ -14,6 +14,12 @@ use Kirby\Data\Data;
  *
  * The YAML files stay the single source of the blueprint; only these keys
  * change with the mode.
+ *
+ * @package   Kirby Higawari
+ * @author    Simon Räder
+ * @link      https://github.com/sayamaapps/kirby-higawari
+ * @copyright Simon Räder
+ * @license   https://opensource.org/licenses/MIT
  */
 final class Panel
 {
