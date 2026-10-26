@@ -61,7 +61,11 @@ final class BlueprintsTest extends TestCase
 				expect(['gericht', 'beschreibung', 'preis', 'kennzeichnungen'], array_keys($fields['tagesgerichte']['fields'] ?? []), "$language: dish fields");
 				expect($dish, $fields['tagesgerichte']['fields']['gericht']['label'] ?? null, "$language: name label");
 				expect($markers, $fields['tagesgerichte']['fields']['kennzeichnungen']['label'] ?? null, "$language: markers label");
-				expect([], higawari_leaks(array_intersect_key($fields, array_flip(['tageskartedatum', 'tagesgerichte', 'higawariinfo']))), "$language: no untranslated key in the tab");
+				expect(
+					[],
+					higawari_leaks(array_intersect_key($fields, array_flip(['tageskartedatum', 'tagesgerichte', 'higawariinfo']))),
+					"$language: no untranslated key in the tab",
+				);
 			}
 		});
 
@@ -69,8 +73,18 @@ final class BlueprintsTest extends TestCase
 		// Mode from (the default) keeps the texts above, also in the same process.
 		higawari_with_site([], function (string $tmp) {
 			$texts = [
-				'de' => ['Anzeigen bis', 'Der letzte Tag, an dem die Gerichte gezeigt werden, dieser Tag eingeschlossen. Leer: es wird nichts gezeigt.', 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.'],
-				'en' => ['Shown until', 'The last day the dishes are shown, that day included. Empty: nothing is shown.', 'Pick the last day and enter the dishes, then save. The menu is shown up to and including that day. Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.'],
+				'de' => [
+					'Anzeigen bis',
+					'Der letzte Tag, an dem die Gerichte gezeigt werden, dieser Tag eingeschlossen. Leer: es wird nichts gezeigt.',
+					'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. ' .
+						'Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
+				],
+				'en' => [
+					'Shown until',
+					'The last day the dishes are shown, that day included. Empty: nothing is shown.',
+					'Pick the last day and enter the dishes, then save. The menu is shown up to and including that day. ' .
+						'Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.',
+				],
 			];
 			foreach ($texts as $language => [$label, $help, $info]) {
 				$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.dateMode' => 'until']);
@@ -99,7 +113,11 @@ final class BlueprintsTest extends TestCase
 			$marker = higawari_kirby($tmp)->page('home')->blueprint()->fields()[Menu::FIELD_DISHES]['fude'] ?? null;
 			expect(['replace', 'update', 'delete'], $marker['actions'] ?? null, 'Fude marker: replace, update, delete');
 			expect(Menu::MAX_DISHES, $marker['maxEntries'] ?? null, 'Fude marker: at most Menu::MAX_DISHES');
-			expect(['field' => Menu::FIELD_DATE, 'value' => 'today', 'editable' => true], $marker['touch'] ?? null, 'Fude marker: every change stamps the date field, the chat may name another day');
+			expect(
+				['field' => Menu::FIELD_DATE, 'value' => 'today', 'editable' => true],
+				$marker['touch'] ?? null,
+				'Fude marker: every change stamps the date field, the chat may name another day',
+			);
 			expect(true, $marker['readImages'] ?? null, 'Fude marker: a photo of the menu may be read');
 		});
 	}

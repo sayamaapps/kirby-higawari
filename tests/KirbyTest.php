@@ -64,7 +64,10 @@ final class KirbyTest extends TestCase
 			expect(3, substr_count($html, '<li class="higawari-gericht">'), 'on: three dishes');
 			holds(!str_contains($html, '<b>Gulasch'), 'on: no raw markup from the Panel');
 			holds(!str_contains($html, 'higawari-leer') && !str_contains($html, 'higawari-hinweis'), 'on: no empty text, no note by default');
-			holds(!str_contains($html, 'http') && !str_contains($html, '<script') && !str_contains($html, '<img') && !str_contains($html, 'src='), 'on: no request to another server, no script, no image');
+			holds(
+				!str_contains($html, 'http') && !str_contains($html, '<script') && !str_contains($html, '<img') && !str_contains($html, 'src='),
+				'on: no request to another server, no script, no image',
+			);
 			expect(3, count($page->higawariCard($noon)['dishes']), 'on: page method returns the dishes');
 
 			// The next day: nothing (and no empty text by default).
@@ -97,7 +100,11 @@ final class KirbyTest extends TestCase
 
 			// Nested spelling works too.
 			$kirby = higawari_kirby($tmp, ['sayamaapps' => ['higawari' => ['active' => true, 'language' => 'de']]]);
-			expect(3, substr_count(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<li class="higawari-gericht">'), 'nested options: plugin switched on');
+			expect(
+				3,
+				substr_count(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<li class="higawari-gericht">'),
+				'nested options: plugin switched on',
+			);
 
 			// English texts follow the language option.
 			$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.language' => 'en']);
@@ -161,7 +168,10 @@ final class KirbyTest extends TestCase
 			$kirby = higawari_kirby($tmp, $until);
 			$page = $kirby->page('home');
 			$html = higawari_render($kirby, ['source' => $page, 'now' => $earlier]);
-			holds(str_contains($html, '<time datetime="2026-10-10">Bis einschließlich Samstag, 10.10.2026</time>'), 'until: German line with the last day, datetime is the last day');
+			holds(
+				str_contains($html, '<time datetime="2026-10-10">Bis einschließlich Samstag, 10.10.2026</time>'),
+				'until: German line with the last day, datetime is the last day',
+			);
 			holds(!str_contains($html, ' – '), 'until: no from-to range');
 			expect(3, substr_count($html, '<li class="higawari-gericht">'), 'until: shown already before the date');
 			$card = $page->higawariCard($earlier);
@@ -171,13 +181,19 @@ final class KirbyTest extends TestCase
 
 			// days is ignored: a broken value is not even read, and days=3 does not extend the last day.
 			$kirby = higawari_kirby($tmp, $until + ['debug' => true, 'sayamaapps.higawari.days' => 'drei']);
-			holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), 'higawari-gericht'), 'until: a broken days value is not read (debug on)');
+			holds(
+				str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), 'higawari-gericht'),
+				'until: a broken days value is not read (debug on)',
+			);
 			$kirby = higawari_kirby($tmp, $until + ['sayamaapps.higawari.days' => 3]);
 			expect('', higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), 'until: days=3 does not extend the last day');
 
 			// A date of today: shown today.
 			$kirby = higawari_kirby($tmp, $until);
-			holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => at('2026-10-10 23:59:59')]), 'Bis einschließlich Samstag, 10.10.2026'), 'until: last second of the date');
+			holds(
+				str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => at('2026-10-10 23:59:59')]), 'Bis einschließlich Samstag, 10.10.2026'),
+				'until: last second of the date',
+			);
 
 			// English line.
 			$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.language' => 'en', 'sayamaapps.higawari.dateMode' => 'until']);
@@ -186,7 +202,10 @@ final class KirbyTest extends TestCase
 
 			// emptyText after the last day, as in mode from.
 			$kirby = higawari_kirby($tmp, $until + ['sayamaapps.higawari.emptyText' => 'Keine Karte.']);
-			holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), '<p class="higawari-leer">Keine Karte.</p>'), 'until: emptyText after the last day');
+			holds(
+				str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $nextDay]), '<p class="higawari-leer">Keine Karte.</p>'),
+				'until: emptyText after the last day',
+			);
 
 			// A broken dateMode: debug throws, otherwise it is reported and `from` is used.
 			$kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['debug' => true, 'sayamaapps.higawari.dateMode' => 'bis']);
@@ -207,7 +226,10 @@ final class KirbyTest extends TestCase
 
 			// Mode from stays the default: the same page without the option.
 			$kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['sayamaapps.higawari.dateMode' => 'from']);
-			holds(str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<time datetime="2026-10-10">Samstag, 10.10.2026</time>'), 'explicit from: unchanged line');
+			holds(
+				str_contains(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<time datetime="2026-10-10">Samstag, 10.10.2026</time>'),
+				'explicit from: unchanged line',
+			);
 		});
 	}
 }
