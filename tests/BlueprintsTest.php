@@ -1,13 +1,11 @@
 <?php
 
 use Kirby\Cms\App;
+use Kirby\Form\Form;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
-
-
 use Sayamaapps\Higawari\Menu;
-use Kirby\Form\Form;
 
 #[CoversClass(Sayamaapps\Higawari\Panel::class)]
 #[RunTestsInSeparateProcesses]

@@ -12,7 +12,6 @@ use Kirby\Cms\Page;
  * Not unit-tested on its own; tests/KirbyTest.php covers it through the page
  * method and the snippet.
  *
- * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
  * @copyright Simon Räder

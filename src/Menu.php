@@ -19,7 +19,6 @@ use DateTimeZone;
  * or a from-to range for a multi-day window, and a dish description may span
  * several lines.
  *
- * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
  * @copyright Simon Räder
@@ -67,8 +66,7 @@ final class Menu
 		string $timezone = self::DEFAULT_TIMEZONE,
 		string $currency = '€',
 		string $mode = self::MODE_FROM
-	): array|null
-	{
+	): array|null {
 		if (!self::validOn($date, $now, $days, $timezone, $mode)) {
 			return null;
 		}
@@ -189,8 +187,7 @@ final class Menu
 		int $days = 1,
 		string $timezone = self::DEFAULT_TIMEZONE,
 		string $mode = self::MODE_FROM
-	): bool
-	{
+	): bool {
 		$window = self::window($date, $days, $timezone, $mode);
 		if ($window === null) {
 			return false;
@@ -212,8 +209,7 @@ final class Menu
 		int $days,
 		string $timezone = self::DEFAULT_TIMEZONE,
 		string $mode = self::MODE_FROM
-	): array|null
-	{
+	): array|null {
 		if (!self::isDate($date)) {
 			return null;
 		}

@@ -3,8 +3,6 @@
 use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-
-
 use Sayamaapps\Higawari\I18n;
 use Sayamaapps\Higawari\Menu;
 

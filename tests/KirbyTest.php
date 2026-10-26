@@ -4,8 +4,6 @@ use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
-
-
 use Sayamaapps\Higawari\Menu;
 use Sayamaapps\Higawari\Options;
 
