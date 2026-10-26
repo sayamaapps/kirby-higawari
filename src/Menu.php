@@ -56,6 +56,7 @@ final class Menu
 	 * card starts being shown on the day it is read.
 	 *
 	 * @param list<array<string, mixed>> $rows
+	 * @param non-empty-string $timezone
 	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string}>}|null
 	 */
 	public static function card(
@@ -67,16 +68,44 @@ final class Menu
 		string $currency = '€',
 		string $mode = self::MODE_FROM
 	): array|null {
-		if (!self::validOn($date, $now, $days, $timezone, $mode)) {
+		$window = self::window($date, $days, $timezone, $mode);
+		if ($window === null || !self::validOn($date, $now, $days, $timezone, $mode)) {
 			return null;
 		}
 		$dishes = self::dishes($rows, $currency);
 		if ($dishes === []) {
 			return null;
 		}
-		$window = self::window($date, $days, $timezone, $mode);
 		$from = $window['from'] ?? $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
 		return ['from' => $from, 'to' => $window['to'], 'dishes' => $dishes];
+	}
+
+	/**
+	 * One cleaned dish from a structure row, or null when the row has no name or
+	 * its price cannot be read.
+	 *
+	 * @return array{name: string, lines: list<string>, price: string, markers: string}|null
+	 */
+	private static function dish(mixed $row, string $currency): array|null
+	{
+		if (!is_array($row)) {
+			return null;
+		}
+		$name = is_string($row['gericht'] ?? null) ? trim($row['gericht']) : '';
+		$raw = $row['preis'] ?? '';
+		if ($name === '' || is_bool($raw) || !is_scalar($raw)) {
+			return null;
+		}
+		$price = self::formatPrice((string)$raw, $currency);
+		if ($price === null) {
+			return null;
+		}
+		return [
+			'name' => $name,
+			'lines' => self::lines(is_string($row['beschreibung'] ?? null) ? $row['beschreibung'] : ''),
+			'price' => $price,
+			'markers' => is_string($row['kennzeichnungen'] ?? null) ? trim($row['kennzeichnungen']) : '',
+		];
 	}
 
 	/**
@@ -93,24 +122,11 @@ final class Menu
 	{
 		$dishes = [];
 		foreach ($rows as $row) {
-			if (!is_array($row)) {
+			$dish = self::dish($row, $currency);
+			if ($dish === null) {
 				continue;
 			}
-			$name = is_string($row['gericht'] ?? null) ? trim($row['gericht']) : '';
-			$raw = $row['preis'] ?? '';
-			if ($name === '' || is_bool($raw) || !is_scalar($raw)) {
-				continue;
-			}
-			$price = self::formatPrice((string)$raw, $currency);
-			if ($price === null) {
-				continue;
-			}
-			$dishes[] = [
-				'name' => $name,
-				'lines' => self::lines(is_string($row['beschreibung'] ?? null) ? $row['beschreibung'] : ''),
-				'price' => $price,
-				'markers' => is_string($row['kennzeichnungen'] ?? null) ? trim($row['kennzeichnungen']) : '',
-			];
+			$dishes[] = $dish;
 			if (count($dishes) === self::MAX_DISHES) {
 				break;
 			}
@@ -125,6 +141,9 @@ final class Menu
 			return '';
 		}
 		$day = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone('UTC'));
+		if ($day === false) {
+			return '';
+		}
 		return I18n::day((int)$day->format('N')) . ', ' . $day->format(I18n::t('format.date'));
 	}
 
@@ -174,12 +193,14 @@ final class Menu
 	/** @return list<string> */
 	private static function lines(string $text): array
 	{
-		return array_values(array_filter(array_map('trim', preg_split('/\R/', $text)), 'strlen'));
+		return array_values(array_filter(array_map('trim', preg_split('/\R/', $text) ?: []), 'strlen'));
 	}
 
 	/**
 	 * Is a menu dated $date shown at $now? The day is taken in $timezone, so
 	 * 00:30 on the 10th in Berlin is the 10th even if it is still the 9th in UTC.
+	 *
+	 * @param non-empty-string $timezone
 	 */
 	public static function validOn(
 		string $date,
@@ -202,6 +223,7 @@ final class Menu
 	 * one day gives null. Mode `until`: no first day (`from` is null), the
 	 * last day is $date, and `$days` is not used.
 	 *
+	 * @param non-empty-string $timezone
 	 * @return array{from: string|null, to: string}|null
 	 */
 	public static function window(
@@ -214,6 +236,9 @@ final class Menu
 			return null;
 		}
 		$day = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone($timezone));
+		if ($day === false) {
+			return null;
+		}
 		if ($mode === self::MODE_UNTIL) {
 			return ['from' => null, 'to' => $day->format('Y-m-d')];
 		}

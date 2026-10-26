@@ -3,6 +3,7 @@
 namespace Sayamaapps\Higawari;
 
 use DateTimeZone;
+use InvalidArgumentException;
 use Kirby\Cms\App;
 use Kirby\Cms\Helpers;
 
@@ -63,10 +64,10 @@ final class Options
 
 		$nested = $options;
 		foreach (explode('.', $dotted) as $segment) {
-			$nested = $nested[$segment] ?? null;
+			$nested = is_array($nested) ? $nested[$segment] ?? null : null;
 		}
 
-		return $options[$prefix . $key] ?? $options[$dotted][$key] ?? $nested[$key] ?? null;
+		return $options[$prefix . $key] ?? $options[$dotted][$key] ?? (is_array($nested) ? $nested[$key] ?? null : null);
 	}
 
 	/** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"). */
@@ -148,7 +149,7 @@ final class Options
 	private static function invalid(App $kirby, string $message): void
 	{
 		if ($kirby->option('debug') === true) {
-			throw new \InvalidArgumentException($message);
+			throw new InvalidArgumentException($message);
 		}
 		if (!isset(self::$reported[$message])) {
 			self::$reported[$message] = true;
@@ -197,11 +198,15 @@ final class Options
 		return is_string($value) && trim($value) !== '' ? trim($value) : null;
 	}
 
-	/** `sayamaapps.higawari.timezone`, default Europe/Berlin. Any zone PHP accepts. */
+	/**
+	 * `sayamaapps.higawari.timezone`, default Europe/Berlin. Any zone PHP accepts.
+	 *
+	 * @return non-empty-string
+	 */
 	public static function timezone(App $kirby): string
 	{
 		$zone = self::get($kirby, 'timezone', Menu::DEFAULT_TIMEZONE);
-		if (is_string($zone)) {
+		if (is_string($zone) && $zone !== '') {
 			try {
 				new DateTimeZone($zone);
 				return $zone;
