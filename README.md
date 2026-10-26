@@ -1,5 +1,7 @@
 # Higawari
 
+**Kirby 5 · PHP 8.2 to 8.5 · MIT**
+
 Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is Japanese for "changes every day": a menu of dishes, each menu valid on a date you set, shown on that day and nothing else.
 
 - **A date, a window.** A menu is valid on its date, or on as many days as the site sets, counted from that date. Without a date nothing is shown, so an old card cannot linger.
@@ -12,8 +14,8 @@ Code, comments and this README are in English. The Panel texts and the snippet t
 
 ## Requirements
 
-- PHP 8.2 to 8.4
-- Kirby 5
+- Kirby 5 (`getkirby/cms` ^5.0)
+- PHP 8.2 to 8.5, with the `mbstring` extension
 
 ## Installation
 
@@ -27,6 +29,14 @@ Composer installs the plugin into `site/plugins/higawari/`. Until the package is
 "repositories": [{ "type": "vcs", "url": "https://github.com/sayamaapps/kirby-higawari" }]
 ```
 
+**ZIP:** download the release from [GitHub](https://github.com/sayamaapps/kirby-higawari/releases) and unpack it to `site/plugins/higawari/`.
+
+**Git submodule:** from the Kirby project root:
+
+```sh
+git submodule add https://github.com/sayamaapps/kirby-higawari site/plugins/higawari
+```
+
 Off by default. Switch it on in `site/config/config.php`:
 
 ```php
@@ -37,7 +47,7 @@ return [
 
 ## Configuration
 
-All options are read as `sayamaapps.higawari.<name>`, flat or nested. `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
+All options are read as `sayamaapps.higawari.<name>`, flat or nested. The spelling `higawari.<name>` of 1.x still works until 2.0, with a deprecation in debug mode (see [Deprecations](#deprecations)). `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
 
 | Option | Default | Meaning |
 |---|---|---|
@@ -155,10 +165,12 @@ $card = $page->higawariCard();                    // now, in the configured zone
 ## Clearing
 
 ```php
-use Higawari\Menu;
+use Sayamaapps\Higawari\Menu;
 
 $page->update(Menu::CLEARED);   // all dishes and the date, in one step
 ```
+
+`Higawari\Menu::CLEARED` (1.x) is the same constant.
 
 `CLEARED` empties both fields together. Keeping the date would hide a menu entered the next day, because the old date has already passed.
 
@@ -181,14 +193,32 @@ The dishes field carries a `fude:` marker, so a site with Fude 1.4 or later gets
 
 Higawari processes no visitor data: it sets no cookies, uses no browser storage and makes no request to a third party. There is nothing to add to a site's privacy policy.
 
+## Deprecations
+
+Kept until 2.0. Nothing breaks in 1.x; a site moves at its own pace.
+
+| 1.x | Now | Note |
+|---|---|---|
+| `higawari.<name>` options (for example `'higawari.active' => true`) | `sayamaapps.higawari.<name>` | Read as a fallback. With Kirby's `debug` option on, a deprecation is raised. The new spelling wins when both are set. |
+| Classes `Higawari\Menu`, `Higawari\Options`, `Higawari\I18n`, `Higawari\Daily`, `Higawari\Panel` | `Sayamaapps\Higawari\…` with the same names | Class aliases in `legacy.php`; no code change needed. |
+
+Also unchanged in 1.x: the snippet name, the blueprint names, the content field names and the page method `higawariCard()`.
+
 ## Development
 
 ```sh
-composer install --ignore-platform-req=ext-gd   # Kirby is a dev dependency, used by the Kirby tests
-composer test                                   # or: sh tests/run.sh
+composer install
+composer test                     # PHPUnit
+composer analyze:psalm            # Psalm, errorLevel 3
+composer analyze:phpmd            # PHP Mess Detector
+composer analyze:unused           # unused Composer packages
+composer analyze:require-checker  # undeclared dependencies
+composer normalize:check          # composer.json layout
 ```
 
-Every `tests/*Test.php` is a standalone script: exit code 0 means pass, so the suite also runs on a hoster's PHP without a test framework. `MenuTest` and `I18nTest` need no Kirby; `KirbyTest` and `BlueprintsTest` boot a real Kirby 5 on a throwaway site and need no network connection. CI runs them on PHP 8.2 to 8.4.
+Code style: `getkirby/php-cs`, installed globally because it needs PHP 8.3 or newer (`composer global require getkirby/php-cs:0.2.1`, then `kirby-cs fix --dry-run --diff`).
+
+The Kirby tests boot a real Kirby 5 on a throwaway site and need no network connection. CI runs the tests on PHP 8.2 to 8.5 with the lowest and the highest dependency versions, and against the Kirby 6 pre-release as a warning.
 
 ## Changelog
 
