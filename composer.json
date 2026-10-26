@@ -3,7 +3,15 @@
     "description": "Daily menu (Tageskarte) for Kirby CMS 5: dishes with a validity date and window, a Panel structure, a plain snippet and a Fude marker for changes by chat. No scripts, no third-party requests, no chat or write endpoint.",
     "type": "kirby-plugin",
     "license": "MIT",
-    "keywords": ["kirby", "kirby-plugin", "kirby-5", "daily-menu", "menu", "restaurant", "privacy"],
+    "keywords": [
+        "kirby",
+        "kirby-plugin",
+        "kirby-5",
+        "daily-menu",
+        "menu",
+        "restaurant",
+        "privacy"
+    ],
     "homepage": "https://github.com/sayamaapps/kirby-higawari",
     "authors": [
         {
@@ -24,10 +32,11 @@
         "sayamaapps/kirby-fude": "<1.4"
     },
     "require-dev": {
-        "getkirby/cms": "^5.0"
+        "getkirby/cms": "^5.0",
+        "phpunit/phpunit": "11.5.55"
     },
     "scripts": {
-        "test": "sh tests/run.sh"
+        "test": "vendor/bin/phpunit"
     },
     "config": {
         "optimize-autoloader": true,
