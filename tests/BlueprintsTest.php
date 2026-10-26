@@ -5,13 +5,11 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../src/I18n.php';
-require_once __DIR__ . '/../src/Menu.php';
 
-use Higawari\Menu;
+use Sayamaapps\Higawari\Menu;
 use Kirby\Form\Form;
 
-#[CoversClass(Higawari\Panel::class)]
+#[CoversClass(Sayamaapps\Higawari\Panel::class)]
 #[RunTestsInSeparateProcesses]
 final class BlueprintsTest extends TestCase
 {

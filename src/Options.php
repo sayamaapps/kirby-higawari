@@ -1,6 +1,6 @@
 <?php
 
-namespace Higawari;
+namespace Sayamaapps\Higawari;
 
 use DateTimeZone;
 use Kirby\Cms\App;

@@ -13,10 +13,10 @@
  * sayamaapps.higawari.emptyText is not set.
  */
 
-use Higawari\Daily;
-use Higawari\I18n;
-use Higawari\Menu;
-use Higawari\Options;
+use Sayamaapps\Higawari\Daily;
+use Sayamaapps\Higawari\I18n;
+use Sayamaapps\Higawari\Menu;
+use Sayamaapps\Higawari\Options;
 
 if (!Options::active(kirby())) {
 	return;

@@ -4,11 +4,10 @@ use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(__DIR__) . '/src/I18n.php';
 
-use Higawari\I18n;
+use Sayamaapps\Higawari\I18n;
 
-#[CoversClass(Higawari\I18n::class)]
+#[CoversClass(Sayamaapps\Higawari\I18n::class)]
 final class I18nTest extends TestCase
 {
 	protected function tearDown(): void

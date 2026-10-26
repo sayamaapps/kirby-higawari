@@ -1,6 +1,6 @@
 <?php
 
-namespace Higawari;
+namespace Sayamaapps\Higawari;
 
 /**
  * Strings of the plugin, Kirby-free. The tables live in translations/<language>.php

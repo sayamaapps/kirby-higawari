@@ -4,13 +4,11 @@ use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(__DIR__) . '/src/I18n.php';
-require_once dirname(__DIR__) . '/src/Menu.php';
 
-use Higawari\I18n;
-use Higawari\Menu;
+use Sayamaapps\Higawari\I18n;
+use Sayamaapps\Higawari\Menu;
 
-#[CoversClass(Higawari\Menu::class)]
+#[CoversClass(Sayamaapps\Higawari\Menu::class)]
 final class MenuTest extends TestCase
 {
 	protected function tearDown(): void

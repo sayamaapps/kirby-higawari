@@ -5,12 +5,9 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(__DIR__) . '/src/I18n.php';
-require_once dirname(__DIR__) . '/src/Menu.php';
-require_once dirname(__DIR__) . '/src/Options.php';
 
-use Higawari\Menu;
-use Higawari\Options;
+use Sayamaapps\Higawari\Menu;
+use Sayamaapps\Higawari\Options;
 
 /** Saturday 10.10.2026 with three dishes: one with line breaks and markers, one with a price in comma form, one without a price. */
 const HIGAWARI_TEST_HOME = [

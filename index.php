@@ -1,15 +1,13 @@
 <?php
 
-use Higawari\Daily;
-use Higawari\I18n;
-use Higawari\Panel;
 use Kirby\Cms\App;
+use Kirby\Filesystem\F;
+use Sayamaapps\Higawari\Daily;
+use Sayamaapps\Higawari\I18n;
+use Sayamaapps\Higawari\Panel;
 
-require_once __DIR__ . '/src/I18n.php';
-require_once __DIR__ . '/src/Menu.php';
-require_once __DIR__ . '/src/Options.php';
-require_once __DIR__ . '/src/Daily.php';
-require_once __DIR__ . '/src/Panel.php';
+F::loadClasses(require __DIR__ . '/autoload.php', __DIR__);
+require_once __DIR__ . '/legacy.php';
 
 /**
  * Higawari (日替わり, “changes daily”): the daily menu for Kirby 5. Dishes with
@@ -40,7 +38,7 @@ App::plugin('sayamaapps/higawari', [
 
 	// Blueprint pieces for `extends:` in a site's own blueprints. The date and
 	// the tab depend on sayamaapps.higawari.dateMode, so Kirby calls them with
-	// the app (see Higawari\Panel).
+	// the app (see Sayamaapps\Higawari\Panel).
 	'blueprints' => [
 		'higawari/fields/date'       => fn (App $kirby): array => Panel::dateField($kirby),
 		'higawari/fields/dishes'     => __DIR__ . '/blueprints/fields/dishes.yml',
@@ -50,7 +48,7 @@ App::plugin('sayamaapps/higawari', [
 	'pageMethods' => [
 		/**
 		 * The menu of this page at $now, or null (plugin off, not valid that
-		 * day, no usable dish). See Higawari\Daily::card().
+		 * day, no usable dish). See Sayamaapps\Higawari\Daily::card().
 		 */
 		'higawariCard' => function (DateTimeImmutable|null $now = null): array|null {
 			return Daily::card(App::instance(), $this, $now);
