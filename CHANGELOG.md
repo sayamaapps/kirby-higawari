@@ -8,7 +8,7 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
-## [Unreleased]
+## [1.5.0] — 2026-10-27
 
 Layout and tooling after the Kirby plugin conventions. No change for a site:
 output, options, content fields, blueprints and page methods are as in 1.4.0.
