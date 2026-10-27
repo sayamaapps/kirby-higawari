@@ -47,7 +47,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring
+          extensions: gd, mbstring
           coverage: none
 
       - name: Install dependencies
@@ -64,6 +64,19 @@ jobs:
 
       - name: Unused dependencies
         run: composer analyze:unused
+
+      # phpcpd needs sebastian/cli-parser 1.x, which PHPUnit 11 rules out in
+      # require-dev, so it is installed globally (like php-cs below).
+      - name: Install phpcpd
+        run: |
+          composer global require --no-interaction sebastian/phpcpd:6.0.3
+          echo "$(composer global config home)/vendor/bin" >> "$GITHUB_PATH"
+
+      - name: Copy and paste detection
+        run: composer analyze:phpcpd
+
+      - name: Platform requirements
+        run: composer check-platform-reqs
 
       - name: Psalm
         run: composer analyze:psalm

@@ -12,6 +12,8 @@
 		"Kirby\\Cms\\Helpers",
 		"Kirby\\Cms\\Page",
 		"Kirby\\Data\\Data",
-		"Kirby\\Filesystem\\F"
+		"Kirby\\Exception\\InvalidArgumentException",
+		"Kirby\\Filesystem\\F",
+		"Kirby\\Toolkit\\I18n"
 	]
 }
