@@ -62,12 +62,21 @@ final class Options
 		$options = $kirby->options();
 		$dotted = rtrim($prefix, '.');
 
-		$nested = $options;
-		foreach (explode('.', $dotted) as $segment) {
-			$nested = is_array($nested) ? $nested[$segment] ?? null : null;
+		// Flat spelling: 'sayamaapps.higawari.active' => true.
+		$flat = $options[$prefix . $key] ?? null;
+		if ($flat !== null) {
+			return $flat;
 		}
 
-		return $options[$prefix . $key] ?? $options[$dotted][$key] ?? (is_array($nested) ? $nested[$key] ?? null : null);
+		// Dotted prefix key: the plugin's `options` block stores its null defaults here.
+		$block = $options[$dotted][$key] ?? null;
+		if ($block !== null) {
+			return $block;
+		}
+
+		// Nested spelling: 'sayamaapps' => ['higawari' => ['active' => true]].
+		$nested = self::nestedValue($options, explode('.', $dotted));
+		return is_array($nested) ? $nested[$key] ?? null : null;
 	}
 
 	/** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"). */
@@ -183,6 +192,16 @@ final class Options
 			}
 		}
 		return 'en';
+	}
+
+	/** The value at a path of nested keys, or null as soon as one step is missing. */
+	private static function nestedValue(array $options, array $path): mixed
+	{
+		$value = $options;
+		foreach ($path as $segment) {
+			$value = is_array($value) ? $value[$segment] ?? null : null;
+		}
+		return $value;
 	}
 
 	/** `sayamaapps.higawari.note`: a line under the dishes, e.g. about prices or allergens. Null shows nothing. */
