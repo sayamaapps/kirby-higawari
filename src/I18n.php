@@ -16,7 +16,7 @@ namespace Sayamaapps\Higawari;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class I18n
+class I18n
 {
 	/** Languages the plugin ships. English is the default and the fallback. */
 	public const LANGUAGES = ['en', 'de'];

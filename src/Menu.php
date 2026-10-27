@@ -24,7 +24,7 @@ use DateTimeZone;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Menu
+class Menu
 {
 	/**
 	 * What “clear the menu” writes: all dishes and the date together. Keeping

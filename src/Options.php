@@ -26,7 +26,7 @@ use Kirby\Exception\InvalidArgumentException;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Options
+class Options
 {
 	public const DEFAULT_CURRENCY = '€';
 	public const DEFAULT_DAYS = 1;

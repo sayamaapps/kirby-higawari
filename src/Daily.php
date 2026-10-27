@@ -17,7 +17,7 @@ use Kirby\Cms\Page;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Daily
+class Daily
 {
 	/**
 	 * The card of a page at $now (default: the clock in the configured zone),

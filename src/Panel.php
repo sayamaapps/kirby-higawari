@@ -20,7 +20,7 @@ use Kirby\Data\Data;
  * @copyright Simon Räder
  * @license   https://opensource.org/licenses/MIT
  */
-final class Panel
+class Panel
 {
 	/** The date field `tageskarteDatum` for the configured mode. */
 	public static function dateField(App $kirby): array
