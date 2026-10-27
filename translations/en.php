@@ -38,6 +38,11 @@ return [
 	'panel.dish.description.help' => 'One line each, for example the sauces or sides.',
 	'panel.dish.price.label' => 'Price in euros (optional)',
 	'panel.dish.price.help' => 'Leave empty to show the dish without a price.',
+	'panel.dish.variant.label' => 'Variant (optional)',
+	'panel.dish.variant.help' => 'A second serving with its own price, for example “with sausage” or “small portion”. '
+		. 'Shown as its own line under the dish; the price above is for the dish without it.',
+	'panel.dish.variant.price.label' => 'Variant price in euros (optional)',
+	'panel.dish.variant.price.help' => 'Shown only together with a variant.',
 	'panel.dish.markers.label' => 'Markers (optional)',
 	'panel.dish.markers.help' => 'Free text, shown as written, for example “V, L”.',
 ];

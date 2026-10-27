@@ -35,6 +35,11 @@ return [
 	'panel.dish.description.help' => 'Eine Zeile je Angabe, etwa Soßen oder Beilagen.',
 	'panel.dish.price.label' => 'Preis in Euro (optional)',
 	'panel.dish.price.help' => 'Leer lassen, dann erscheint das Gericht ohne Preis.',
+	'panel.dish.variant.label' => 'Variante (optional)',
+	'panel.dish.variant.help' => 'Eine zweite Ausführung mit eigenem Preis, etwa „mit Wiener“ oder „kleine Portion“. '
+		. 'Erscheint als eigene Zeile unter dem Gericht; der Preis oben gilt ohne die Variante.',
+	'panel.dish.variant.price.label' => 'Preis der Variante in Euro (optional)',
+	'panel.dish.variant.price.help' => 'Wird nur zusammen mit einer Variante gezeigt.',
 	'panel.dish.markers.label' => 'Kennzeichnungen (optional)',
 	'panel.dish.markers.help' => 'Freier Text, wird so gezeigt, etwa „V, L“.',
 ];

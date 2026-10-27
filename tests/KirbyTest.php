@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Sayamaapps\Higawari\Menu;
 use Sayamaapps\Higawari\Options;
 
-/** Saturday 10.10.2026 with three dishes: one with line breaks and markers, one with a price in comma form, one without a price. */
+/** Saturday 10.10.2026 with four dishes: one with line breaks and markers, one with a price in comma form, one without a price, one with a variant. */
 const HIGAWARI_TEST_HOME = [
 	'einleitung' => 'Willkommen',
 	'tageskarteDatum' => '2026-10-10',
@@ -15,6 +15,7 @@ const HIGAWARI_TEST_HOME = [
 		['gericht' => 'Kartoffelsuppe', 'preis' => 6.9, 'beschreibung' => "mit Brot\nund Kräutern", 'kennzeichnungen' => 'V, L'],
 		['gericht' => '<b>Gulasch</b>', 'preis' => '12,5'],
 		['gericht' => 'Ohne Preis'],
+		['gericht' => 'Linseneintopf', 'preis' => '9,9', 'variante' => 'mit <i>Wiener</i>', 'variantenpreis' => '11,5'],
 	],
 ];
 
@@ -63,15 +64,17 @@ final class KirbyTest extends TestCase
 			holds(str_contains($html, '<p class="higawari-kennzeichnungen">Kennzeichnungen: V, L</p>'), 'on: markers');
 			holds(str_contains($html, '<span class="higawari-name">&lt;b&gt;Gulasch&lt;/b&gt;</span>'), 'on: dish name escaped');
 			holds(str_contains($html, '<span class="higawari-preis">12,50 €</span>'), 'on: numeric text price formatted');
-			expect(2, substr_count($html, 'class="higawari-preis"'), 'on: dish without price has no price span');
-			expect(3, substr_count($html, '<li class="higawari-gericht">'), 'on: three dishes');
+			holds(str_contains($html, '<span class="higawari-preis">9,90 €</span>' . "\n\t\t\t" . '<span class="higawari-variante">mit &lt;i&gt;Wiener&lt;/i&gt;</span>' . "\n\t\t\t" . '<span class="higawari-variantenpreis">11,50 €</span>'), 'on: variant after the price, escaped, with its own price');
+			expect(1, substr_count($html, 'class="higawari-variante"'), 'on: only the dish with a variant has a variant line');
+			expect(3, substr_count($html, 'class="higawari-preis"'), 'on: dish without price has no price span');
+			expect(4, substr_count($html, '<li class="higawari-gericht">'), 'on: four dishes');
 			holds(!str_contains($html, '<b>Gulasch'), 'on: no raw markup from the Panel');
 			holds(!str_contains($html, 'higawari-leer') && !str_contains($html, 'higawari-hinweis'), 'on: no empty text, no note by default');
 			holds(
 				!str_contains($html, 'http') && !str_contains($html, '<script') && !str_contains($html, '<img') && !str_contains($html, 'src='),
 				'on: no request to another server, no script, no image',
 			);
-			expect(3, count($page->higawariCard($noon)['dishes']), 'on: page method returns the dishes');
+			expect(4, count($page->higawariCard($noon)['dishes']), 'on: page method returns the dishes');
 
 			// The next day: nothing (and no empty text by default).
 			expect('', higawari_render($kirby, ['source' => $page, 'now' => $nextDay]), 'next day: nothing printed');
@@ -104,7 +107,7 @@ final class KirbyTest extends TestCase
 			// Nested spelling works too.
 			$kirby = higawari_kirby($tmp, ['sayamaapps' => ['higawari' => ['active' => true, 'language' => 'de']]]);
 			expect(
-				3,
+				4,
 				substr_count(higawari_render($kirby, ['source' => $kirby->page('home'), 'now' => $noon]), '<li class="higawari-gericht">'),
 				'nested options: plugin switched on',
 			);
@@ -176,7 +179,7 @@ final class KirbyTest extends TestCase
 				'until: German line with the last day, datetime is the last day',
 			);
 			holds(!str_contains($html, ' – '), 'until: no from-to range');
-			expect(3, substr_count($html, '<li class="higawari-gericht">'), 'until: shown already before the date');
+			expect(4, substr_count($html, '<li class="higawari-gericht">'), 'until: shown already before the date');
 			$card = $page->higawariCard($earlier);
 			expect(['2026-10-08', '2026-10-10'], [$card['from'], $card['to']], 'until: page method: from is today, to is the date');
 			expect('', higawari_render($kirby, ['source' => $page, 'now' => $nextDay]), 'until: nothing on the day after the date');

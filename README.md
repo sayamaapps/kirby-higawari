@@ -5,7 +5,7 @@
 Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is Japanese for "changes every day": a menu of dishes, each menu valid on a date you set, shown on that day and nothing else.
 
 - **A date, a window.** A menu is valid on its date, or on as many days as the site sets, counted from that date. Without a date nothing is shown, so an old card cannot linger.
-- **The Panel.** A tab with the date and up to five dishes (name, further lines, price, markers). Dish names are the only required text.
+- **The Panel.** A tab with the date and up to five dishes (name, further lines, price, an optional variant with its own price, markers). Dish names are the only required text.
 - **Plain output.** One snippet with semantic HTML and `higawari-*` classes. No JavaScript, no request to another server, no cookie.
 - **Optional text when nothing is valid.** Either nothing, or a sentence of your choice.
 - **Nothing that writes from outside.** Higawari has no chat, bot or write endpoint. Changes by chat belong to the separate package [Fude](https://github.com/sayamaapps/kirby-fude), which reads the marker in the dishes blueprint (see below).
@@ -76,9 +76,11 @@ Dish fields:
 | `gericht` | text, required, max. 160 | The dish. |
 | `beschreibung` | textarea, max. 300 | Further lines, one per line break. |
 | `preis` | number, 0 to 999, step 0.01 | Optional. Empty shows the dish without a price. |
+| `variante` | text, max. 60 | Optional. A second serving with its own price, such as „mit Wiener“ or „kleine Portion“, shown as its own line under the dish. `preis` is then the price without it. |
+| `variantenpreis` | number, 0 to 999, step 0.01 | Optional. The price of the variant; shown only with `variante`. |
 | `kennzeichnungen` | text, max. 40 | Optional markers, shown as written. |
 
-Reading rules, the same for the Panel content and imported data: a dish without a name is dropped; a price that cannot be read (`abc`, `1000`, `12.345`) drops the dish rather than showing a wrong amount; a decimal comma and a decimal point both work; at most five dishes are shown, in order.
+Reading rules, the same for the Panel content and imported data: a dish without a name is dropped; a price that cannot be read (`abc`, `1000`, `12.345`) drops the dish rather than showing a wrong amount; a decimal comma and a decimal point both work; at most five dishes are shown, in order. A variant needs a name: a variant price alone is ignored, and a variant price that cannot be read drops the variant line, not the dish.
 
 ### Two date modes
 
@@ -90,6 +92,7 @@ Switching the mode changes the meaning of the stored date, not the content: a si
 ### Why these fields
 
 - **`gericht`, `preis`, `beschreibung`:** the same price check applies to every price. The extra text can be kept as one string or split into lines; Higawari splits it, because a line break in a Panel field is the way editors write a list of sauces or sides.
+- **`variante`, `variantenpreis`:** one dish, two prices („Linseneintopf 9,90 €, mit Wiener 11,50 €“) is common on a daily menu. Written into the description, the second price loses the price column and the price check. One variant covers the usual case; a dish with more servings is better entered as two dishes.
 - **`kennzeichnungen`:** free text, because an allergen or marker list is a legal matter that the site should decide, not the package. A structured list (for example EU allergen numbers) would be a guess at that decision.
 - **`tageskarteDatum`:** the day the menu is served, plus the window (`days`), so a menu can be shown for more than one day. An undated menu that stays visible until it is removed is deliberately not supported: a daily menu without a date would show last week's dishes.
 - **Five dishes:** the cap is five, both in the code and in the blueprint, so a larger blueprint cannot show more dishes than the code does.
@@ -135,6 +138,8 @@ Markup, with classes only and no inline style:
     <li class="higawari-gericht">
       <span class="higawari-name">Kartoffelsuppe</span>
       <span class="higawari-preis">6,90 €</span>
+      <span class="higawari-variante">mit Wiener</span>          <!-- only with a variant -->
+      <span class="higawari-variantenpreis">8,40 €</span>    <!-- only with a variant price -->
       <p class="higawari-beschreibung">mit Brot<br>und Kräutern</p>
       <p class="higawari-kennzeichnungen">Kennzeichnungen: V, L</p>
     </li>
@@ -156,7 +161,8 @@ $card = $page->higawariCard();                    // now, in the configured zone
 // [
 //     'from' => '2026-10-10', 'to' => '2026-10-10',   // mode until: from is today, to the date
 //     'dishes' => [
-//         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'markers' => 'V, L'],
+//         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'markers' => 'V, L',
+//          'variant' => ['label' => 'mit Wiener', 'price' => '8,40 €']],   // or null
 //     ],
 // ]
 // or null: plugin off, not valid that day, or no usable dish
@@ -182,7 +188,7 @@ The dishes field carries a `fude:` marker, so a site with Fude 1.4 or later gets
 |---|---|
 | **Required** | `gericht` |
 | **Asked** | — (the menu comes as one message or a photo; asking every day would slow it down) |
-| **Free** | `beschreibung`, `preis`, `kennzeichnungen` |
+| **Free** | `beschreibung`, `preis`, `variante`, `variantenpreis`, `kennzeichnungen` |
 
 - In mode `until` a change by chat without a named day sets the date to today, so the menu is shown until today only. The bot names the last day ("bis Freitag").
 - The collection is named `<page id>-tagesgerichte`, for example `home-tagesgerichte`.

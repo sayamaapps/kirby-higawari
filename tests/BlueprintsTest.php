@@ -59,7 +59,7 @@ final class BlueprintsTest extends TestCase
 				expect('date', $fields['tageskartedatum']['type'] ?? null, "$language: date is a date field");
 				expect($dishes, $fields['tagesgerichte']['label'] ?? null, "$language: dishes label");
 				expect(5, $fields['tagesgerichte']['max'] ?? null, "$language: at most five dishes");
-				expect(['gericht', 'beschreibung', 'preis', 'kennzeichnungen'], array_keys($fields['tagesgerichte']['fields'] ?? []), "$language: dish fields");
+				expect(['gericht', 'beschreibung', 'preis', 'variante', 'variantenpreis', 'kennzeichnungen'], array_keys($fields['tagesgerichte']['fields'] ?? []), "$language: dish fields");
 				expect($dish, $fields['tagesgerichte']['fields']['gericht']['label'] ?? null, "$language: name label");
 				expect($markers, $fields['tagesgerichte']['fields']['kennzeichnungen']['label'] ?? null, "$language: markers label");
 				expect(

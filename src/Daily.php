@@ -25,7 +25,7 @@ class Daily
 	 * or null when the plugin is off, the menu is not valid that day or it has
 	 * no usable dish. Nothing is cached: the answer changes with the clock.
 	 *
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string}>}|null
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}>}|null
 	 */
 	public static function card(App $kirby, Page $page, DateTimeImmutable|null $now = null): array|null
 	{

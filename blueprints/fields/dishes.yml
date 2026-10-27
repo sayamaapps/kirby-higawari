@@ -40,6 +40,20 @@ fields:
     max: 999
     step: 0.01
     help: higawari.panel.dish.price.help
+  variante:
+    label: higawari.panel.dish.variant.label
+    type: text
+    maxlength: 60
+    width: 1/2
+    help: higawari.panel.dish.variant.help
+  variantenpreis:
+    label: higawari.panel.dish.variant.price.label
+    type: number
+    min: 0
+    max: 999
+    step: 0.01
+    width: 1/2
+    help: higawari.panel.dish.variant.price.help
   kennzeichnungen:
     label: higawari.panel.dish.markers.label
     type: text
