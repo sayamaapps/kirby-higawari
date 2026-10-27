@@ -1,73 +1,58 @@
 <?php
+
 /**
- * Shared test helpers. Every test file is a standalone script:
+ * Shared test helpers, loaded by tests/bootstrap.php.
  *
- *   require_once __DIR__ . '/helpers.php';
- *
- * Kirby-free tests require the classes they need themselves (src/I18n.php
- * first). Kirby tests boot a throwaway site through higawari_kirby(). Each
- * file calls expect()/holds() as often as needed, then finish('Suite name'),
- * which prints every failure and exits 1, or prints the count and exits 0.
+ * expect() and holds() are one PHPUnit assertion each, so a failing check
+ * ends the test and PHPUnit prints the label. Kirby fixtures boot a throwaway
+ * site with the package symlinked as site/plugins/higawari.
  */
 
-$GLOBALS['higawariChecks'] = 0;
-$GLOBALS['higawariFailures'] = [];
+use Kirby\Cms\App;
+use Kirby\Data\Yaml;
+use Kirby\Filesystem\Dir;
+use PHPUnit\Framework\Assert;
 
 /** Strict comparison ($expected === $actual). */
 function expect(mixed $expected, mixed $actual, string $what): void
 {
-    $GLOBALS['higawariChecks']++;
-    if ($expected !== $actual) {
-        $GLOBALS['higawariFailures'][] = sprintf(
-            "  ✗ %s\n      expected: %s\n      actual:   %s",
-            $what,
-            var_export($expected, true),
-            var_export($actual, true)
-        );
-    }
+	Assert::assertSame($expected, $actual, $what);
 }
 
 function holds(bool $ok, string $what): void
 {
-    $GLOBALS['higawariChecks']++;
-    if (!$ok) {
-        $GLOBALS['higawariFailures'][] = '  ✗ ' . $what;
-    }
+	Assert::assertTrue($ok, $what);
+}
+
+/**
+ * Tests without an App (I18n, Menu) read the plugin's texts through Kirby's
+ * translation loader, with the same array index.php registers.
+ */
+function higawari_texts_without_app(): void
+{
+	Kirby\Toolkit\I18n::$load = static fn (string $locale): array => (require dirname(__DIR__) . '/config/translations.php')[$locale] ?? [];
 }
 
 /** The callable must throw an instance of $class. */
 function throws(string $class, callable $fn, string $what): void
 {
-    try {
-        $fn();
-    } catch (Throwable $e) {
-        holds($e instanceof $class, $what . ': threw ' . $e::class . ' instead of ' . $class);
-        return;
-    }
-    holds(false, $what . ': nothing thrown, expected ' . $class);
+	try {
+		$fn();
+	} catch (Throwable $e) {
+		holds($e instanceof $class, $what . ': threw ' . $e::class . ' instead of ' . $class);
+		return;
+	}
+	holds(false, $what . ': nothing thrown, expected ' . $class);
 }
 
 /** A moment in Europe/Berlin (or another zone): at('2026-10-10 12:00'). */
 function at(string $when, string $zone = 'Europe/Berlin'): DateTimeImmutable
 {
-    return new DateTimeImmutable($when, new DateTimeZone($zone));
-}
-
-/** Prints the result and exits: 0 when every check passed, 1 otherwise. */
-function finish(string $suite): never
-{
-    $failures = $GLOBALS['higawariFailures'];
-    $checks = $GLOBALS['higawariChecks'];
-    if ($failures !== []) {
-        fwrite(STDERR, "$suite: " . count($failures) . " of $checks checks failed\n" . implode("\n", $failures) . "\n");
-        exit(1);
-    }
-    echo "$suite: all $checks checks passed\n";
-    exit(0);
+	return new DateTimeImmutable($when, new DateTimeZone($zone));
 }
 
 /* --------------------------------------------------------------------------
- * Kirby fixtures (need vendor/: composer install).
+ * Kirby fixtures
  * -------------------------------------------------------------------------- */
 
 const HIGAWARI_HOME_BLUEPRINT = "title: Startseite\ntabs:\n  tageskarte:\n    extends: higawari/tabs/daily-menu\n";
@@ -79,58 +64,60 @@ const HIGAWARI_HOME_BLUEPRINT = "title: Startseite\ntabs:\n  tageskarte:\n    ex
  */
 function higawari_with_site(array $fields, callable $run): void
 {
-    $base = dirname(__DIR__);
-    if (!is_file($base . '/vendor/autoload.php')) {
-        fwrite(STDERR, "Composer dependencies missing; run composer install first\n");
-        exit(1);
-    }
-    require_once $base . '/vendor/autoload.php';
-
-    $tmp = sys_get_temp_dir() . '/higawari-kirby-' . bin2hex(random_bytes(6));
-    foreach (['public', 'content/home', 'site/plugins', 'site/templates', 'site/blueprints/pages', 'storage'] as $dir) {
-        mkdir($tmp . '/' . $dir, 0700, true);
-    }
-    symlink($base, $tmp . '/site/plugins/higawari');
-    file_put_contents($tmp . '/site/templates/default.php', 'Fixture');
-    file_put_contents($tmp . '/site/blueprints/pages/home.yml', HIGAWARI_HOME_BLUEPRINT);
-    $blocks = ['Title: Home'];
-    foreach ($fields as $name => $value) {
-        $blocks[] = ucfirst($name) . ': ' . (is_array($value) ? "\n\n" . Kirby\Data\Yaml::encode($value) : (string) $value);
-    }
-    file_put_contents($tmp . '/content/home/home.txt', implode("\n\n----\n\n", $blocks) . "\n");
-    try {
-        $run($tmp);
-    } finally {
-        higawari_remove_tree($tmp);
-    }
+	$base = dirname(__DIR__);
+	$tmp = sys_get_temp_dir() . '/higawari-kirby-' . bin2hex(random_bytes(6));
+	foreach (['public', 'content/home', 'site/plugins', 'site/templates', 'site/blueprints/pages', 'storage'] as $dir) {
+		mkdir($tmp . '/' . $dir, 0700, true);
+	}
+	symlink($base, $tmp . '/site/plugins/higawari');
+	file_put_contents($tmp . '/site/templates/default.php', 'Fixture');
+	file_put_contents($tmp . '/site/blueprints/pages/home.yml', HIGAWARI_HOME_BLUEPRINT);
+	$blocks = ['Title: Home'];
+	foreach ($fields as $name => $value) {
+		$blocks[] = ucfirst($name) . ': ' . (is_array($value) ? "\n\n" . Yaml::encode($value) : (string)$value);
+	}
+	file_put_contents($tmp . '/content/home/home.txt', implode("\n\n----\n\n", $blocks) . "\n");
+	try {
+		$run($tmp);
+	} finally {
+		Dir::remove($tmp);
+	}
 }
 
 /** A fresh Kirby on a higawari_with_site() directory. Options are passed as they are. */
-function higawari_kirby(string $tmp, array $options = []): Kirby\Cms\App
+function higawari_kirby(string $tmp, array $options = []): App
 {
-    Kirby\Template\Snippet::$cache = [];
-    // Kirby keeps loaded blueprints per process; the Panel blueprints depend on the options.
-    Kirby\Cms\Blueprint::$loaded = [];
-    return new Kirby\Cms\App([
-        'roots' => [
-            'base' => $tmp,
-            'index' => $tmp . '/public',
-            'content' => $tmp . '/content',
-            'site' => $tmp . '/site',
-            'storage' => $tmp . '/storage',
-        ],
-        'options' => ['url' => 'http://example.invalid'] + $options,
-    ]);
+	\Kirby\Template\Snippet::$cache = [];
+	// Kirby keeps loaded blueprints per process; the Panel blueprints depend on the options.
+	\Kirby\Cms\Blueprint::$loaded = [];
+	// The snippet and the page method read kirby() (App::instance()), so the new app must be the current one.
+	// App::destroy() is not used: Kirby includes a plugin's index.php once per process, so a destroyed plugin registry stays empty.
+	return App::instance(new App([
+		'roots' => [
+			'base' => $tmp,
+			'index' => $tmp . '/public',
+			'content' => $tmp . '/content',
+			'site' => $tmp . '/site',
+			'storage' => $tmp . '/storage',
+		],
+		'options' => ['url' => 'http://example.invalid'] + $options,
+	]));
 }
 
+/**
+ * Removes a directory tree that was made by a fixture.
+ *
+ * @deprecated use Kirby\Filesystem\Dir::remove()
+ * @internal
+ */
 function higawari_remove_tree(string $path): void
 {
-    if (!is_dir($path) || is_link($path)) {
-        return;
-    }
-    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
-    foreach ($it as $file) {
-        $file->isDir() && !$file->isLink() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-    }
-    rmdir($path);
+	if (!is_dir($path) || is_link($path)) {
+		return;
+	}
+	$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+	foreach ($it as $file) {
+		$file->isDir() && !$file->isLink() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+	}
+	rmdir($path);
 }

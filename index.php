@@ -1,61 +1,31 @@
 <?php
 
-use Higawari\Daily;
-use Higawari\I18n;
-use Higawari\Panel;
-use Kirby\Cms\App;
-
-require_once __DIR__ . '/src/I18n.php';
-require_once __DIR__ . '/src/Menu.php';
-require_once __DIR__ . '/src/Options.php';
-require_once __DIR__ . '/src/Daily.php';
-require_once __DIR__ . '/src/Panel.php';
+use Kirby\Filesystem\F;
 
 /**
- * Higawari (日替わり, “changes daily”): the daily menu for Kirby 5. Dishes with
- * a validity date, shown on that day (or on N days from it), plus a Panel tab
- * and an unstyled snippet. Off by default: without
+ * Plugin registration for Higawari (日替わり, “changes daily”): the daily menu
+ * for Kirby 5. Dishes with a validity date, shown on that day (or on N days
+ * from it), plus a Panel tab and an unstyled snippet. Off by default: without
  * 'sayamaapps.higawari.active' => true the page method returns null and the
  * snippet prints nothing.
+ *
+ * Kirby loads this file. It registers the class map, the legacy aliases and
+ * the definitions in config/. The logic lives in src/.
  *
  * Nothing here accepts input from outside the Panel. Changing a menu by chat
  * is the job of the separate package Fude, which reads the `fude:` marker in
  * blueprints/fields/dishes.yml.
  */
+F::loadClasses(require __DIR__ . '/autoload.php', __DIR__);
+require_once __DIR__ . '/legacy.php';
 
-$higawariTranslations = [];
-foreach (I18n::LANGUAGES as $higawariLanguage) {
-    foreach (I18n::table($higawariLanguage) as $higawariKey => $higawariText) {
-        $higawariTranslations[$higawariLanguage]['higawari.' . $higawariKey] = $higawariText;
-    }
-}
-unset($higawariLanguage, $higawariKey, $higawariText);
-
-App::plugin('sayamaapps/higawari', [
-    // All strings, also as blueprint labels: higawari.panel.* and higawari.snippet.*.
-    'translations' => $higawariTranslations,
-
-    'snippets' => [
-        'higawari' => __DIR__ . '/snippets/higawari.php',
-    ],
-
-    // Blueprint pieces for `extends:` in a site's own blueprints. The date and
-    // the tab depend on sayamaapps.higawari.dateMode, so Kirby calls them with
-    // the app (see Higawari\Panel).
-    'blueprints' => [
-        'higawari/fields/date'       => fn (App $kirby): array => Panel::dateField($kirby),
-        'higawari/fields/dishes'     => __DIR__ . '/blueprints/fields/dishes.yml',
-        'higawari/tabs/daily-menu'   => fn (App $kirby): array => Panel::tab($kirby),
-    ],
-
-    'pageMethods' => [
-        /**
-         * The menu of this page at $now, or null (plugin off, not valid that
-         * day, no usable dish). See Higawari\Daily::card().
-         */
-        'higawariCard' => function (?DateTimeImmutable $now = null): ?array {
-            return Daily::card(App::instance(), $this, $now);
-        },
-    ],
-]);
-unset($higawariTranslations);
+Kirby::plugin(
+	name: 'sayamaapps/higawari',
+	extends: [
+		'translations' => require __DIR__ . '/config/translations.php',
+		'snippets'     => require __DIR__ . '/config/snippets.php',
+		'blueprints'   => require __DIR__ . '/config/blueprints.php',
+		'pageMethods'  => require __DIR__ . '/config/page-methods.php',
+	],
+	root: __DIR__
+);

@@ -8,6 +8,37 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [Unreleased]
+
+Layout and tooling after the Kirby plugin conventions. No change for a site:
+output, options, content fields, blueprints and page methods are as in 1.4.0.
+
+### Changed
+
+- Classes live in `Sayamaapps\Higawari\` (`src/`), loaded through the class map
+  in `autoload.php`. `index.php` only registers the plugin; `config/` holds the
+  plugin's definitions. The 1.x class names are aliases in `legacy.php`.
+- Snippet texts are read through Kirby's translation lookup
+  (`sayamaapps.higawari.<key>`), with the bundled text as fallback. The result is
+  the same without an App. The Panel keeps its `higawari.panel.*` keys.
+- The snippet markup is indented with tabs. Only whitespace in the rendered HTML
+  changes.
+- Tests run with PHPUnit (`composer test`); `tests/run.sh` and its helper
+  `finish()` are gone. Both were test code, not part of the plugin's API.
+- `composer.lock` is committed. CI tests the lowest, the highest and the locked
+  dependency versions.
+
+### Deprecated
+
+- `Higawari\I18n::t()`, use `Sayamaapps\Higawari\I18n::translate()`. A
+  docblock only; no run-time notice, the result is the same.
+- The 1.x class names `Higawari\*`, use `Sayamaapps\Higawari\*`. A docblock only.
+
+### Planned for 2.0
+
+- Broken options throw Kirby's `InvalidArgumentException` class (debug mode).
+- Run-time deprecation notices for the aliases and `I18n::t()`, then their removal.
+
 ## [1.4.0] — 2026-10-25
 
 ### Added
