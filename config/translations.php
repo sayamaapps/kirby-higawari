@@ -2,14 +2,12 @@
 
 use Sayamaapps\Higawari\I18n;
 
-// Every string, also as blueprint labels: higawari.panel.* and higawari.snippet.*
-// (and sayamaapps.higawari.* with the same text).
-// I18n reads its own tables, so a missing Kirby translation never changes a text.
+// Every string under sayamaapps.higawari.<key>, as the blueprints and I18n read it.
+// The short spelling higawari.<key> stays registered for sites that use it in their own blueprints.
 $translations = [];
 foreach (I18n::LANGUAGES as $language) {
 	foreach (I18n::table($language) as $key => $text) {
 		$translations[$language]['sayamaapps.higawari.' . $key] = $text;
-		// The spelling used by the blueprints until the blueprint labels move over.
 		$translations[$language]['higawari.' . $key] = $text;
 	}
 }

@@ -27,8 +27,8 @@ class Panel
 	{
 		$field = Data::read(dirname(__DIR__) . '/blueprints/fields/date.yml');
 		if (Options::dateMode($kirby) === Menu::MODE_UNTIL) {
-			$field['label'] = 'higawari.panel.date.until.label';
-			$field['help'] = 'higawari.panel.date.until.help';
+			$field['label'] = 'sayamaapps.higawari.panel.date.until.label';
+			$field['help'] = 'sayamaapps.higawari.panel.date.until.help';
 		}
 		return $field;
 	}
@@ -38,7 +38,7 @@ class Panel
 	{
 		$tab = Data::read(dirname(__DIR__) . '/blueprints/tabs/daily-menu.yml');
 		if (Options::dateMode($kirby) === Menu::MODE_UNTIL) {
-			$tab['fields']['higawariInfo']['text'] = 'higawari.panel.info.until.text';
+			$tab['fields']['higawariInfo']['text'] = 'sayamaapps.higawari.panel.info.until.text';
 		}
 		return $tab;
 	}

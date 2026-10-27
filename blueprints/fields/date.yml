@@ -1,6 +1,6 @@
 # Date field `tageskarteDatum` (“gilt am”). Field name: see fields/dishes.yml.
-label: higawari.panel.date.label
+label: sayamaapps.higawari.panel.date.label
 type: date
 display: DD.MM.YYYY
 default: today
-help: higawari.panel.date.help
+help: sayamaapps.higawari.panel.date.help

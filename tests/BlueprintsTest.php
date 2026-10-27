@@ -18,21 +18,22 @@ final class BlueprintsTest extends TestCase
 
 	public function testSuite(): void
 	{
-		/** Every string in a nested array that starts with `higawari.`: an untranslated key. */
+		/** Every string in a nested array that starts with `sayamaapps.higawari.` or `higawari.`: an untranslated key. */
 		function higawari_leaks(mixed $value): array
 		{
+			$isKey = static fn (string $text): bool => str_starts_with($text, 'sayamaapps.higawari.') || str_starts_with($text, 'higawari.');
 			$found = [];
-			$walk = function (mixed $node, string $path) use (&$walk, &$found): void {
+			$walk = function (mixed $node, string $path) use (&$walk, &$found, $isKey): void {
 				if (is_array($node)) {
 					foreach ($node as $key => $child) {
-						if (is_string($key) && str_starts_with($key, 'higawari.')) {
+						if (is_string($key) && $isKey($key)) {
 							$found[] = $path . '.' . $key;
 						}
 						$walk($child, $path . '.' . $key);
 					}
 					return;
 				}
-				if (is_string($node) && str_starts_with($node, 'higawari.')) {
+				if (is_string($node) && $isKey($node)) {
 					$found[] = $path;
 				}
 			};
