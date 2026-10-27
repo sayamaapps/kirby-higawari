@@ -5,13 +5,13 @@ use PHPUnit\Framework\TestCase;
 use Sayamaapps\Higawari\Options;
 
 /**
- * Options are read as sayamaapps.higawari.<key>, with the spelling higawari.<key>
- * as fallback. The fallback is reported as a deprecation in debug mode.
+ * Options are read as sayamaapps.higawari.<key>, flat or nested, as in 1.x.
+ * The short spelling higawari.<key> is not read and raises nothing.
  */
 #[CoversClass(Options::class)]
 final class OptionsPrefixTest extends TestCase
 {
-	public function testNewSpellingSwitchesTheMenuOn(): void
+	public function testFlatSpellingSwitchesTheMenuOn(): void
 	{
 		higawari_with_site([], function (string $tmp): void {
 			$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true]);
@@ -19,15 +19,16 @@ final class OptionsPrefixTest extends TestCase
 		});
 	}
 
-	public function testNewSpellingWinsOverTheOldOne(): void
+	public function testNestedSpellingSwitchesTheMenuOn(): void
 	{
 		higawari_with_site([], function (string $tmp): void {
-			$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => false, 'higawari.active' => true]);
-			expect(false, Options::active($kirby), 'sayamaapps.higawari.active wins when both are set');
+			$kirby = higawari_kirby($tmp, ['sayamaapps' => ['higawari' => ['active' => true, 'days' => 3]]]);
+			expect(true, Options::active($kirby), 'sayamaapps.higawari.active is read when nested');
+			expect(3, Options::days($kirby), 'sayamaapps.higawari.days is read when nested');
 		});
 	}
 
-	public function testOldSpellingStillWorksAndIsDeprecated(): void
+	public function testShortSpellingIsNotRead(): void
 	{
 		$deprecations = [];
 		set_error_handler(function (int $level, string $message) use (&$deprecations): bool {
@@ -37,15 +38,15 @@ final class OptionsPrefixTest extends TestCase
 
 		try {
 			higawari_with_site([], function (string $tmp): void {
-				// Kirby reports deprecations in debug mode only.
+				// Kirby reports deprecations in debug mode only; nothing is reported here.
 				$kirby = higawari_kirby($tmp, ['debug' => true, 'higawari.active' => true]);
-				expect(true, Options::active($kirby), 'higawari.active is read as fallback');
+				expect(false, Options::active($kirby), 'higawari.active is not read');
 			});
 		} finally {
 			restore_error_handler();
 		}
 
-		expect(['Higawari: higawari.active is deprecated, use sayamaapps.higawari.active'], $deprecations, 'the old spelling is reported');
+		expect([], $deprecations, 'the short spelling raises no deprecation');
 	}
 
 	public function testUnsetOptionsGiveTheDefaults(): void

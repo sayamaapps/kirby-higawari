@@ -3,9 +3,8 @@
 namespace Sayamaapps\Higawari;
 
 use DateTimeZone;
+use InvalidArgumentException;
 use Kirby\Cms\App;
-use Kirby\Cms\Helpers;
-use Kirby\Exception\InvalidArgumentException;
 
 /**
  * Reads `sayamaapps.higawari.*` options. `null` counts as "not set". Both
@@ -17,9 +16,6 @@ use Kirby\Exception\InvalidArgumentException;
  * with Kirby's `debug` option on: then it throws, so a developer sees it on the
  * page rather than in the log.
  *
- * Defaults are given at each read (get() and its callers). The `options` block
- * of the plugin (config/options.php) only declares the keys, with null.
- *
  * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
@@ -30,10 +26,9 @@ class Options
 {
 	public const DEFAULT_CURRENCY = '€';
 	public const DEFAULT_DAYS = 1;
-	public const LEGACY_PREFIX = 'higawari.';
 	public const MAX_DAYS = 366;
 
-	/** Option prefix; the spelling `higawari.<key>` is read as a fallback until 2.0. */
+	/** Option prefix: options are `sayamaapps.higawari.<key>`. */
 	public const PREFIX = 'sayamaapps.higawari.';
 
 	/** @var array<string, true> */
@@ -49,34 +44,6 @@ class Options
 	public static function applyLanguage(App $kirby): void
 	{
 		I18n::setLanguage(self::language($kirby));
-	}
-
-	/**
-	 * The value of `<prefix><key>` in any spelling the site config may use: the
-	 * flat key, the dotted prefix key where the plugin's `options` defaults are
-	 * stored, or the nested array. Kirby's option() stops at the dotted prefix
-	 * key, which holds the null defaults, and never reaches a nested setting.
-	 */
-	private static function configured(App $kirby, string $prefix, string $key): mixed
-	{
-		$options = $kirby->options();
-		$dotted = rtrim($prefix, '.');
-
-		// Flat spelling: 'sayamaapps.higawari.active' => true.
-		$flat = $options[$prefix . $key] ?? null;
-		if ($flat !== null) {
-			return $flat;
-		}
-
-		// Dotted prefix key: the plugin's `options` block stores its null defaults here.
-		$block = $options[$dotted][$key] ?? null;
-		if ($block !== null) {
-			return $block;
-		}
-
-		// Nested spelling: 'sayamaapps' => ['higawari' => ['active' => true]].
-		$nested = self::nestedValue($options, explode('.', $dotted));
-		return is_array($nested) ? $nested[$key] ?? null : null;
 	}
 
 	/** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"). */
@@ -129,26 +96,12 @@ class Options
 	}
 
 	/**
-	 * Reads `<key>` from the new spelling, then the old one (with a deprecation).
-	 * Returns $default when neither is set.
+	 * Reads `sayamaapps.higawari.<key>` (flat or nested, see the class note).
+	 * Returns $default when it is not set.
 	 */
 	public static function get(App $kirby, string $key, mixed $default = null): mixed
 	{
-		$value = self::configured($kirby, self::PREFIX, $key);
-		if ($value !== null) {
-			return $value;
-		}
-
-		// The spelling without `sayamaapps.` still works, with a deprecation.
-		$legacy = self::configured($kirby, self::LEGACY_PREFIX, $key);
-		if ($legacy !== null) {
-			Helpers::deprecated(
-				'Higawari: higawari.' . $key . ' is deprecated, use ' . self::PREFIX . $key,
-				'option-prefix'
-			);
-		}
-
-		return $legacy ?? $default;
+		return $kirby->option(self::PREFIX . $key) ?? $default;
 	}
 
 	/**
@@ -158,7 +111,7 @@ class Options
 	private static function invalid(App $kirby, string $message): void
 	{
 		if ($kirby->option('debug') === true) {
-			throw new InvalidArgumentException(message: $message);
+			throw new InvalidArgumentException($message);
 		}
 		if (!isset(self::$reported[$message])) {
 			self::$reported[$message] = true;
@@ -192,16 +145,6 @@ class Options
 			}
 		}
 		return 'en';
-	}
-
-	/** The value at a path of nested keys, or null as soon as one step is missing. */
-	private static function nestedValue(array $options, array $path): mixed
-	{
-		$value = $options;
-		foreach ($path as $segment) {
-			$value = is_array($value) ? $value[$segment] ?? null : null;
-		}
-		return $value;
 	}
 
 	/** `sayamaapps.higawari.note`: a line under the dishes, e.g. about prices or allergens. Null shows nothing. */

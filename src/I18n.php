@@ -2,7 +2,6 @@
 
 namespace Sayamaapps\Higawari;
 
-use Kirby\Cms\Helpers;
 use Kirby\Toolkit\I18n as KirbyI18n;
 
 /**
@@ -61,10 +60,6 @@ class I18n
 	 */
 	public static function t(string $key, array $values = []): string
 	{
-		Helpers::deprecated(
-			'Higawari\\I18n::t() is deprecated, use Sayamaapps\\Higawari\\I18n::translate()',
-			'i18n-t'
-		);
 		return self::translate($key, $values);
 	}
 
@@ -82,6 +77,8 @@ class I18n
 	 * this request. `{name}` placeholders are replaced with the given values,
 	 * unescaped. A missing key gives the key itself.
 	 *
+	 * The bundled text is the fallback, so without an App the result is the
+	 * same as with one (English when the key is missing in the language).
 	 * The placeholders are filled here and not with Kirby's template(): its
 	 * query resolution starts an App when none is running.
 	 *
@@ -89,7 +86,8 @@ class I18n
 	 */
 	public static function translate(string $key, array $values = []): string
 	{
-		$text = KirbyI18n::translate(self::PREFIX . $key, $key, self::$language);
+		$fallback = self::table(self::$language)[$key] ?? self::table('en')[$key] ?? $key;
+		$text = KirbyI18n::translate(self::PREFIX . $key, $fallback, self::$language);
 		if (!is_string($text)) {
 			return $key;
 		}

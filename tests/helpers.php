@@ -33,6 +33,24 @@ function higawari_texts_without_app(): void
 	Kirby\Toolkit\I18n::$load = static fn (string $locale): array => (require dirname(__DIR__) . '/config/translations.php')[$locale] ?? [];
 }
 
+/**
+ * Prints the result and exits: 0 when every check passed, 1 otherwise.
+ *
+ * @deprecated the 1.x standalone runner (tests/run.sh); PHPUnit reports results itself
+ * @internal
+ */
+function finish(string $suite): never
+{
+	$failures = $GLOBALS['higawariFailures'];
+	$checks = $GLOBALS['higawariChecks'];
+	if ($failures !== []) {
+		fwrite(STDERR, "$suite: " . count($failures) . " of $checks checks failed\n" . implode("\n", $failures) . "\n");
+		exit(1);
+	}
+	echo "$suite: all $checks checks passed\n";
+	exit(0);
+}
+
 /** The callable must throw an instance of $class. */
 function throws(string $class, callable $fn, string $what): void
 {
@@ -102,4 +120,22 @@ function higawari_kirby(string $tmp, array $options = []): App
 		],
 		'options' => ['url' => 'http://example.invalid'] + $options,
 	]));
+}
+
+/**
+ * Removes a directory tree that was made by a fixture.
+ *
+ * @deprecated use Kirby\Filesystem\Dir::remove()
+ * @internal
+ */
+function higawari_remove_tree(string $path): void
+{
+	if (!is_dir($path) || is_link($path)) {
+		return;
+	}
+	$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+	foreach ($it as $file) {
+		$file->isDir() && !$file->isLink() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+	}
+	rmdir($path);
 }

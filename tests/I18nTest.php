@@ -58,5 +58,9 @@ final class I18nTest extends TestCase
 		expect('Daily menu', I18n::translate('snippet.heading'), 'English heading after fallback');
 
 		expect('no.such.key', I18n::translate('no.such.key'), 'missing key returns the key');
+
+		I18n::setLanguage('en');
+
+		expect(I18n::translate('snippet.heading'), I18n::t('snippet.heading'), 'the 1.x wrapper t() gives the same text');
 	}
 }

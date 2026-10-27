@@ -47,7 +47,7 @@ return [
 
 ## Configuration
 
-All options are read as `sayamaapps.higawari.<name>`, flat or nested. The short spelling `higawari.<name>` is read as a fallback when the long one is not set; it is deprecated (see [Deprecations](#deprecations)). `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
+All options are read as `sayamaapps.higawari.<name>`, flat or nested. The short spelling `higawari.<name>` is not read (see [Deprecations](#deprecations)). `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws an `InvalidArgumentException` instead.
 
 | Option | Default | Meaning |
 |---|---|---|
@@ -195,17 +195,24 @@ Higawari processes no visitor data: it sets no cookies, uses no browser storage 
 
 ## Deprecations
 
-Kept until 2.0. Nothing breaks; a site moves at its own pace.
+Kept until 2.0. Nothing breaks; a site moves at its own pace. Nothing is reported at run time; the replacements are marked `@deprecated` in the code.
 
 | Old name | Now | Note |
 |---|---|---|
-| `higawari.<name>` options (for example `'higawari.active' => true`) | `sayamaapps.higawari.<name>` | Read as a fallback, deprecated. Before this version the short spelling was ignored, so a site that sets it now gets the menu switched on. With Kirby's `debug` option on, a deprecation is raised. The long spelling wins when both are set. |
 | Classes `Higawari\Menu`, `Higawari\Options`, `Higawari\I18n`, `Higawari\Daily`, `Higawari\Panel` | `Sayamaapps\Higawari\…` with the same names | Class aliases in `legacy.php`; no code change needed. |
-| `Higawari\I18n::t()` | `Sayamaapps\Higawari\I18n::translate()` | Wrapper, deprecated. Only code that calls the class directly is affected. |
+| `Higawari\I18n::t()` | `Sayamaapps\Higawari\I18n::translate()` | Wrapper with the same result. Only code that calls the class directly is affected. |
 
-With Kirby's `debug` option on, a broken option throws `Kirby\Exception\InvalidArgumentException` instead of `InvalidArgumentException`; the message is the same.
+The short option spelling `higawari.<name>` was never read and is not read now. Use `sayamaapps.higawari.<name>`.
 
-Also unchanged in 1.x: the snippet name, the blueprint names, the content field names and the page method `higawariCard()`.
+Also unchanged in 1.x: the snippet name, the blueprint names, the content field names, the page method `higawariCard()` and the options.
+
+## Planned for 2.0
+
+These would change what a site sees or catches, so they wait for the next major version:
+
+- A broken option throws `Kirby\Exception\InvalidArgumentException` instead of `InvalidArgumentException`. That class does not extend `InvalidArgumentException`, so a `catch (InvalidArgumentException)` around the plugin stops catching it. Debug mode only.
+- Run-time deprecation notices for the class aliases and for `I18n::t()`.
+- Removal of the class aliases and of `I18n::t()`.
 
 ## Development
 

@@ -1,7 +1,6 @@
 <?php
 
 use Kirby\Cms\App;
-use Kirby\Exception\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
@@ -127,7 +126,7 @@ final class KirbyTest extends TestCase
 
 			// A broken days value: debug throws, otherwise it is logged and 1 is used.
 			$kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['debug' => true, 'sayamaapps.higawari.days' => 'drei']);
-			throws(InvalidArgumentException::class, fn () => Options::days($kirby), 'debug: broken days throws');
+			throws(\InvalidArgumentException::class, fn () => Options::days($kirby), 'debug: broken days throws');
 			$log = sys_get_temp_dir() . '/higawari-test-' . bin2hex(random_bytes(4)) . '.log';
 			$previousLog = ini_get('error_log');
 			ini_set('error_log', $log);
@@ -213,7 +212,7 @@ final class KirbyTest extends TestCase
 
 			// A broken dateMode: debug throws, otherwise it is reported and `from` is used.
 			$kirby = higawari_kirby($tmp, HIGAWARI_TEST_ON + ['debug' => true, 'sayamaapps.higawari.dateMode' => 'bis']);
-			throws(InvalidArgumentException::class, fn () => Options::dateMode($kirby), 'debug: broken dateMode throws');
+			throws(\InvalidArgumentException::class, fn () => Options::dateMode($kirby), 'debug: broken dateMode throws');
 			$log = sys_get_temp_dir() . '/higawari-test-' . bin2hex(random_bytes(4)) . '.log';
 			$previousLog = ini_get('error_log');
 			ini_set('error_log', $log);
