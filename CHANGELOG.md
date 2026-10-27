@@ -8,6 +8,20 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.6.0] — 2026-10-27
+
+### Added
+
+- **A variant with its own price** for a dish: the new optional dish fields
+  `variante` (text, max. 60) and `variantenpreis` (number, 0 to 999), for a
+  menu line like „Linseneintopf 9,90 €, mit Wiener 11,50 €“. The snippet shows
+  it after the price as `higawari-variante` and `higawari-variantenpreis`; each
+  dish from `higawariCard()` gets the key `variant` (`label`, `price`) or null.
+  A variant price without a name is ignored, an unreadable one drops the
+  variant line, not the dish. Panel texts `panel.dish.variant.*` in German and
+  English; Fude offers both fields to the chat (the help text tells the bot).
+  Additive: content without the new fields shows exactly as before.
+
 ## [1.5.0] — 2026-10-27
 
 Layout and tooling after the Kirby plugin conventions. No change for a site:

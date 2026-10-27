@@ -59,7 +59,7 @@ class Menu
 	 *
 	 * @param list<array<string, mixed>> $rows
 	 * @param non-empty-string $timezone
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string}>}|null
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}>}|null
 	 */
 	public static function card(
 		string $date,
@@ -84,9 +84,11 @@ class Menu
 
 	/**
 	 * One cleaned dish from a structure row, or null when the row has no name or
-	 * its price cannot be read.
+	 * its price cannot be read. The variant is a second serving with its own
+	 * price, such as „mit Wiener“: null without a variant name, and null when
+	 * its price cannot be read (the dish stays, with its own price only).
 	 *
-	 * @return array{name: string, lines: list<string>, price: string, markers: string}|null
+	 * @return array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}|null
 	 */
 	private static function dish(mixed $row, string $currency): array|null
 	{
@@ -107,18 +109,20 @@ class Menu
 			'lines' => self::lines(is_string($row['beschreibung'] ?? null) ? $row['beschreibung'] : ''),
 			'price' => $price,
 			'markers' => is_string($row['kennzeichnungen'] ?? null) ? trim($row['kennzeichnungen']) : '',
+			'variant' => self::variant($row, $currency),
 		];
 	}
 
 	/**
 	 * Cleaned dishes from the structure field, at most MAX_DISHES, in order.
 	 * Each: name, lines (the description split at line breaks), price (already
-	 * formatted, '' for none) and markers (free text).
+	 * formatted, '' for none), markers (free text) and variant (name and price
+	 * of a second serving, or null).
 	 *
 	 * A row without a name is skipped, as is a row whose price cannot be read.
 	 * Imported content without Panel validation is handled the same way.
 	 *
-	 * @return list<array{name: string, lines: list<string>, price: string, markers: string}>
+	 * @return list<array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}>
 	 */
 	public static function dishes(array $rows, string $currency = '€'): array
 	{
@@ -217,6 +221,22 @@ class Menu
 		}
 		$today = $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
 		return ($window['from'] === null || $today >= $window['from']) && $today <= $window['to'];
+	}
+
+	/**
+	 * The variant of a dish row: name and formatted price ('' for none), or null.
+	 *
+	 * @return array{label: string, price: string}|null
+	 */
+	private static function variant(array $row, string $currency): array|null
+	{
+		$label = is_string($row['variante'] ?? null) ? trim($row['variante']) : '';
+		$raw = $row['variantenpreis'] ?? '';
+		if ($label === '' || is_bool($raw) || !is_scalar($raw)) {
+			return null;
+		}
+		$price = self::formatPrice((string)$raw, $currency);
+		return $price === null ? null : ['label' => $label, 'price' => $price];
 	}
 
 	/**

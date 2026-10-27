@@ -114,14 +114,14 @@ final class MenuTest extends TestCase
 		expect(3, count($dishes), 'only the usable rows are kept');
 
 		expect(
-			['name' => 'Suppe', 'lines' => ['Mit Brot', 'Kräutern'], 'price' => '7,50 €', 'markers' => 'V, L'],
+			['name' => 'Suppe', 'lines' => ['Mit Brot', 'Kräutern'], 'price' => '7,50 €', 'markers' => 'V, L', 'variant' => null],
 			$dishes[0],
 			'first dish cleaned: trimmed, lines split, markers trimmed',
 		);
 
 		expect('12,50 €', $dishes[1]['price'], 'float price formatted');
 
-		expect(['name' => 'Ohne Preis', 'lines' => [], 'price' => '', 'markers' => ''], $dishes[2], 'dish without price, lines or markers');
+		expect(['name' => 'Ohne Preis', 'lines' => [], 'price' => '', 'markers' => '', 'variant' => null], $dishes[2], 'dish without price, lines or markers');
 
 		expect('7,00', Menu::dishes([['gericht' => 'A', 'preis' => '7']], '')[0]['price'], 'dishes without currency');
 
@@ -131,11 +131,32 @@ final class MenuTest extends TestCase
 
 		expect('Gericht 5', $many[4]['name'], 'the first five, in order');
 
+		// Variant: a second serving with its own price, shown only with a name.
+		$variant = static fn (array $row) => Menu::dishes([['gericht' => 'Eintopf', 'preis' => '9,9'] + $row])[0]['variant'];
+
+		expect(['label' => 'mit Wiener', 'price' => '11,50 €'], $variant(['variante' => ' mit Wiener ', 'variantenpreis' => '11,5']), 'variant trimmed, price formatted');
+
+		expect(['label' => 'mit Wiener', 'price' => '11,50 €'], $variant(['variante' => 'mit Wiener', 'variantenpreis' => 11.5]), 'variant with a float price');
+
+		expect(['label' => 'auch vegan', 'price' => ''], $variant(['variante' => 'auch vegan']), 'variant without a price');
+
+		expect(null, $variant(['variantenpreis' => '11,5']), 'a price without a variant name is no variant');
+
+		expect(null, $variant(['variante' => '  ', 'variantenpreis' => '11,5']), 'a blank variant name is no variant');
+
+		foreach (['abc', '1000', true, []] as $price) {
+			expect(null, $variant(['variante' => 'mit Wiener', 'variantenpreis' => $price]), 'an unreadable variant price drops the variant: ' . json_encode($price));
+		}
+
+		expect('9,90 €', Menu::dishes([['gericht' => 'Eintopf', 'preis' => '9,9', 'variante' => 'mit Wiener', 'variantenpreis' => 'abc']])[0]['price'], 'the dish stays when only its variant price is unreadable');
+
+		expect('11,50', Menu::dishes([['gericht' => 'Eintopf', 'variante' => 'mit Wiener', 'variantenpreis' => '11.5']], '')[0]['variant']['price'], 'variant without currency');
+
 		// Card: only on a valid day with at least one dish.
 		$rows = [['gericht' => 'Suppe', 'preis' => '7']];
 
 		expect(
-			['from' => '2026-10-10', 'to' => '2026-10-10', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+			['from' => '2026-10-10', 'to' => '2026-10-10', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '', 'variant' => null]]],
 			Menu::card('2026-10-10', $rows, at('2026-10-10 12:00'), 1, $zone, '€'),
 			'card on its day',
 		);
@@ -197,13 +218,13 @@ final class MenuTest extends TestCase
 
 		// Card in mode until: from is today in the zone, to is the date.
 		expect(
-			['from' => '2026-10-25', 'to' => '2026-10-30', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+			['from' => '2026-10-25', 'to' => '2026-10-30', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '', 'variant' => null]]],
 			Menu::card('2026-10-30', $rows, at('2026-10-25 12:00'), 1, $zone, '€', $until),
 			'until: card runs from today to the date',
 		);
 
 		expect(
-			['from' => '2026-10-26', 'to' => '2026-10-26', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '']]],
+			['from' => '2026-10-26', 'to' => '2026-10-26', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'markers' => '', 'variant' => null]]],
 			Menu::card('2026-10-26', $rows, new DateTimeImmutable('2026-10-25T23:30:00Z'), 1, $zone, '€', $until),
 			'until: from is the zone\'s day (00:30 on 26.10. in Berlin)',
 		);

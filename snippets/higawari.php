@@ -53,6 +53,12 @@ $label = Menu::label($card['from'], $card['to'], $mode);
 <?php if ($dish['price'] !== '') : ?>
 			<span class="higawari-preis"><?= esc($dish['price']) ?></span>
 <?php endif ?>
+<?php if ($dish['variant'] !== null) : ?>
+			<span class="higawari-variante"><?= esc($dish['variant']['label']) ?></span>
+<?php if ($dish['variant']['price'] !== '') : ?>
+			<span class="higawari-variantenpreis"><?= esc($dish['variant']['price']) ?></span>
+<?php endif ?>
+<?php endif ?>
 <?php if ($dish['lines'] !== []) : ?>
 <?php $lines = array_map(static fn (string $line): string => esc($line), $dish['lines']) ?>
 			<p class="higawari-beschreibung"><?= implode('<br>', $lines) ?></p>
