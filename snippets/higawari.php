@@ -39,7 +39,7 @@ if ($card === null && $empty === null) {
 $note = Options::note(kirby());
 ?>
 <section class="higawari" aria-labelledby="higawari-titel">
-  <h2 class="higawari-titel" id="higawari-titel"><?= esc(I18n::t('snippet.heading')) ?></h2>
+  <h2 class="higawari-titel" id="higawari-titel"><?= esc(I18n::translate('snippet.heading')) ?></h2>
 <?php if ($card !== null) : ?>
 <?php
 $datetime = $mode === Menu::MODE_UNTIL ? $card['to'] : $card['from'];
@@ -58,7 +58,7 @@ $label = Menu::label($card['from'], $card['to'], $mode);
       <p class="higawari-beschreibung"><?= implode('<br>', $lines) ?></p>
 <?php endif ?>
 <?php if ($dish['markers'] !== '') : ?>
-      <p class="higawari-kennzeichnungen"><?= esc(I18n::t('snippet.markers', ['markers' => $dish['markers']])) ?></p>
+      <p class="higawari-kennzeichnungen"><?= esc(I18n::translate('snippet.markers', ['markers' => $dish['markers']])) ?></p>
 <?php endif ?>
     </li>
 <?php endforeach ?>

@@ -6,7 +6,8 @@ use DateTimeImmutable;
 use DateTimeZone;
 
 /**
- * Rules of the daily menu, Kirby-free (tests/MenuTest.php).
+ * Rules of the daily menu. No App object is needed; the texts come from I18n
+ * (tests/MenuTest.php).
  *
  * A menu is one date (`tageskarteDatum`, the day it is valid on) and up to
  * five dishes (`tagesgerichte`). It is shown on every day of its window: the
@@ -144,7 +145,7 @@ class Menu
 		if ($day === false) {
 			return '';
 		}
-		return I18n::day((int)$day->format('N')) . ', ' . $day->format(I18n::t('format.date'));
+		return I18n::day((int)$day->format('N')) . ', ' . $day->format(I18n::translate('format.date'));
 	}
 
 	/**
@@ -181,13 +182,13 @@ class Menu
 	public static function label(string $from, string $to, string $mode = self::MODE_FROM): string
 	{
 		if ($mode === self::MODE_UNTIL) {
-			return I18n::t('snippet.until', ['date' => self::displayDate($to)]);
+			return I18n::translate('snippet.until', ['date' => self::displayDate($to)]);
 		}
 		$first = self::displayDate($from);
 		if ($from === $to) {
 			return $first;
 		}
-		return I18n::t('snippet.range', ['from' => $first, 'to' => self::displayDate($to)]);
+		return I18n::translate('snippet.range', ['from' => $first, 'to' => self::displayDate($to)]);
 	}
 
 	/** @return list<string> */

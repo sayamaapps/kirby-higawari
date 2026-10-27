@@ -24,6 +24,15 @@ function holds(bool $ok, string $what): void
 	Assert::assertTrue($ok, $what);
 }
 
+/**
+ * Tests without an App (I18n, Menu) read the plugin's texts through Kirby's
+ * translation loader, with the same array index.php registers.
+ */
+function higawari_texts_without_app(): void
+{
+	Kirby\Toolkit\I18n::$load = static fn (string $locale): array => (require dirname(__DIR__) . '/config/translations.php')[$locale] ?? [];
+}
+
 /** The callable must throw an instance of $class. */
 function throws(string $class, callable $fn, string $what): void
 {

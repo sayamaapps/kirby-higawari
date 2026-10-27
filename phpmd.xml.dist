@@ -16,8 +16,6 @@
 	<rule ref="rulesets/design.xml" />
 
 	<rule ref="rulesets/naming.xml">
-		<!-- I18n::t() is the translation shorthand used in the snippet and the tests. -->
-		<exclude name="ShortMethodName" />
 		<!-- from, to and the formula letters of the date arithmetic are the names of the public API (README). -->
 		<exclude name="ShortVariable" />
 	</rule>

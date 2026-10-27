@@ -1,10 +1,11 @@
 <?php
 
 /**
- * English strings: the default and the fallback for missing keys.
- * `{name}` placeholders are filled in by Higawari\I18n::t(). tests/I18nTest.php
- * checks that every language file has the same keys and placeholders as this
- * one. Keys are part of the contract: never rename one without a CHANGELOG entry.
+ * English strings: the default language.
+ * `{name}` placeholders are filled in by Sayamaapps\Higawari\I18n::translate().
+ * tests/I18nTest.php checks that every language file has the same keys and
+ * placeholders as this one. Keys are part of the contract: never rename one
+ * without a CHANGELOG entry.
  */
 return [
 	// Weekdays, ISO-8601 numbering (1 = Monday).

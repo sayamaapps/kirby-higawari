@@ -8,6 +8,11 @@ use Sayamaapps\Higawari\I18n;
 #[CoversClass(Sayamaapps\Higawari\I18n::class)]
 final class I18nTest extends TestCase
 {
+	protected function setUp(): void
+	{
+		higawari_texts_without_app();
+	}
+
 	protected function tearDown(): void
 	{
 		App::destroy();
@@ -42,16 +47,16 @@ final class I18nTest extends TestCase
 
 		I18n::setLanguage('de');
 
-		expect('Tageskarte', I18n::t('snippet.heading'), 'German heading');
+		expect('Tageskarte', I18n::translate('snippet.heading'), 'German heading');
 
-		expect('Kennzeichnungen: V', I18n::t('snippet.markers', ['markers' => 'V']), 'placeholder filled');
+		expect('Kennzeichnungen: V', I18n::translate('snippet.markers', ['markers' => 'V']), 'placeholder filled');
 
 		I18n::setLanguage('fr');
 
 		expect('en', I18n::language(), 'unknown language falls back to English');
 
-		expect('Daily menu', I18n::t('snippet.heading'), 'English heading after fallback');
+		expect('Daily menu', I18n::translate('snippet.heading'), 'English heading after fallback');
 
-		expect('no.such.key', I18n::t('no.such.key'), 'missing key returns the key');
+		expect('no.such.key', I18n::translate('no.such.key'), 'missing key returns the key');
 	}
 }

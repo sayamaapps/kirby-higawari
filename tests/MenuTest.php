@@ -9,6 +9,11 @@ use Sayamaapps\Higawari\Menu;
 #[CoversClass(Sayamaapps\Higawari\Menu::class)]
 final class MenuTest extends TestCase
 {
+	protected function setUp(): void
+	{
+		higawari_texts_without_app();
+	}
+
 	protected function tearDown(): void
 	{
 		App::destroy();
