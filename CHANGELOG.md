@@ -18,12 +18,13 @@ output, options, content fields, blueprints and page methods are as in 1.4.0.
 - Classes live in `Sayamaapps\Higawari\` (`src/`), loaded through the class map
   in `autoload.php`. `index.php` only registers the plugin; `config/` holds the
   plugin's definitions. The 1.x class names are aliases in `legacy.php`.
-- Snippet and Panel texts are read through Kirby's translation lookup, with the
-  bundled text as fallback. The result is the same without an App.
+- Snippet texts are read through Kirby's translation lookup
+  (`sayamaapps.higawari.<key>`), with the bundled text as fallback. The result is
+  the same without an App. The Panel keeps its `higawari.panel.*` keys.
 - The snippet markup is indented with tabs. Only whitespace in the rendered HTML
   changes.
-- Tests run with PHPUnit (`composer test`); `tests/run.sh` is gone. The test
-  helpers `finish()` and `higawari_remove_tree()` stay as deprecated internals.
+- Tests run with PHPUnit (`composer test`); `tests/run.sh` and its helper
+  `finish()` are gone. Both were test code, not part of the plugin's API.
 - `composer.lock` is committed. CI tests the lowest, the highest and the locked
   dependency versions.
 
