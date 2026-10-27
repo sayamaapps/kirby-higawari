@@ -114,22 +114,6 @@ class Menu
 	}
 
 	/**
-	 * The variant of a dish row: name and formatted price ('' for none), or null.
-	 *
-	 * @return array{label: string, price: string}|null
-	 */
-	private static function variant(array $row, string $currency): array|null
-	{
-		$label = is_string($row['variante'] ?? null) ? trim($row['variante']) : '';
-		$raw = $row['variantenpreis'] ?? '';
-		if ($label === '' || is_bool($raw) || !is_scalar($raw)) {
-			return null;
-		}
-		$price = self::formatPrice((string)$raw, $currency);
-		return $price === null ? null : ['label' => $label, 'price' => $price];
-	}
-
-	/**
 	 * Cleaned dishes from the structure field, at most MAX_DISHES, in order.
 	 * Each: name, lines (the description split at line breaks), price (already
 	 * formatted, '' for none), markers (free text) and variant (name and price
@@ -237,6 +221,22 @@ class Menu
 		}
 		$today = $now->setTimezone(new DateTimeZone($timezone))->format('Y-m-d');
 		return ($window['from'] === null || $today >= $window['from']) && $today <= $window['to'];
+	}
+
+	/**
+	 * The variant of a dish row: name and formatted price ('' for none), or null.
+	 *
+	 * @return array{label: string, price: string}|null
+	 */
+	private static function variant(array $row, string $currency): array|null
+	{
+		$label = is_string($row['variante'] ?? null) ? trim($row['variante']) : '';
+		$raw = $row['variantenpreis'] ?? '';
+		if ($label === '' || is_bool($raw) || !is_scalar($raw)) {
+			return null;
+		}
+		$price = self::formatPrice((string)$raw, $currency);
+		return $price === null ? null : ['label' => $label, 'price' => $price];
 	}
 
 	/**
