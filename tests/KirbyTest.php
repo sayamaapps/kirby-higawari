@@ -2,7 +2,7 @@
 
 use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
-use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Sayamaapps\Higawari\Menu;
@@ -27,7 +27,10 @@ function higawari_render(Kirby\Cms\App $kirby, array $data = []): string
 	return $kirby->snippet('higawari', $data, true);
 }
 
-#[CoversNothing]
+#[CoversClass(Sayamaapps\Higawari\Daily::class)]
+#[CoversClass(Sayamaapps\Higawari\I18n::class)]
+#[CoversClass(Sayamaapps\Higawari\Menu::class)]
+#[CoversClass(Sayamaapps\Higawari\Options::class)]
 #[RunTestsInSeparateProcesses]
 final class KirbyTest extends TestCase
 {
