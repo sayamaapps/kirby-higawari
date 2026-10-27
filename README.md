@@ -47,7 +47,7 @@ return [
 
 ## Configuration
 
-All options are read as `sayamaapps.higawari.<name>`, flat or nested. The spelling `higawari.<name>` of 1.x still works until 2.0, with a deprecation in debug mode (see [Deprecations](#deprecations)). `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
+All options are read as `sayamaapps.higawari.<name>`, flat or nested. The short spelling `higawari.<name>` is read as a fallback when the long one is not set; it is deprecated (see [Deprecations](#deprecations)). `null` counts as "not set". A broken value is reported to the PHP error log once and the default is used; with Kirby's `debug` option on, it throws instead.
 
 | Option | Default | Meaning |
 |---|---|---|
@@ -195,12 +195,16 @@ Higawari processes no visitor data: it sets no cookies, uses no browser storage 
 
 ## Deprecations
 
-Kept until 2.0. Nothing breaks in 1.x; a site moves at its own pace.
+Kept until 2.0. Nothing breaks; a site moves at its own pace.
 
-| 1.x | Now | Note |
+| Old name | Now | Note |
 |---|---|---|
-| `higawari.<name>` options (for example `'higawari.active' => true`) | `sayamaapps.higawari.<name>` | Read as a fallback. With Kirby's `debug` option on, a deprecation is raised. The new spelling wins when both are set. |
+| `higawari.<name>` options (for example `'higawari.active' => true`) | `sayamaapps.higawari.<name>` | Read as a fallback, deprecated. Before this version the short spelling was ignored, so a site that sets it now gets the menu switched on. With Kirby's `debug` option on, a deprecation is raised. The long spelling wins when both are set. |
 | Classes `Higawari\Menu`, `Higawari\Options`, `Higawari\I18n`, `Higawari\Daily`, `Higawari\Panel` | `Sayamaapps\Higawari\…` with the same names | Class aliases in `legacy.php`; no code change needed. |
+
+Renamed in this version, not documented before: `Higawari\I18n::t()` is now `Sayamaapps\Higawari\I18n::translate()`. Only code that calls the class directly is affected.
+
+With Kirby's `debug` option on, a broken option throws `Kirby\Exception\InvalidArgumentException` instead of `InvalidArgumentException`; the message is the same.
 
 Also unchanged in 1.x: the snippet name, the blueprint names, the content field names and the page method `higawariCard()`.
 
@@ -208,15 +212,22 @@ Also unchanged in 1.x: the snippet name, the blueprint names, the content field 
 
 ```sh
 composer install
+composer ci                       # the checks below, except the code style
 composer test                     # PHPUnit
 composer analyze:psalm            # Psalm, errorLevel 3
 composer analyze:phpmd            # PHP Mess Detector
 composer analyze:unused           # unused Composer packages
 composer analyze:require-checker  # undeclared dependencies
+composer analyze:phpcpd           # copy and paste detection, needs the global phpcpd
 composer normalize:check          # composer.json layout
 ```
 
-Code style: `getkirby/php-cs`, installed globally because it needs PHP 8.3 or newer (`composer global require getkirby/php-cs:0.2.1`, then `kirby-cs fix --dry-run --diff`).
+Two tools are installed globally: php-cs needs PHP 8.3 or newer, and phpcpd 6 conflicts with the PHPUnit dependencies.
+
+```sh
+composer global require getkirby/php-cs:0.2.1 sebastian/phpcpd:6.0.3
+kirby-cs fix --dry-run --diff     # code style; getkirby/php-cs needs PHP 8.3 or newer
+```
 
 The Kirby tests boot a real Kirby 5 on a throwaway site and need no network connection. CI runs the tests on PHP 8.2 to 8.5 with the lowest and the highest dependency versions, and against the Kirby 6 pre-release as a warning.
 
