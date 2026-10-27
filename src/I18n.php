@@ -2,6 +2,7 @@
 
 namespace Sayamaapps\Higawari;
 
+use Kirby\Cms\Helpers;
 use Kirby\Toolkit\I18n as KirbyI18n;
 
 /**
@@ -48,6 +49,22 @@ class I18n
 	public static function setLanguage(string $language): void
 	{
 		self::$language = in_array($language, self::LANGUAGES, true) ? $language : 'en';
+	}
+
+	/**
+	 * The former name of translate(), kept until 2.0 for code outside the plugin.
+	 *
+	 * @deprecated use Sayamaapps\Higawari\I18n::translate()
+	 * @param array<string, scalar> $values
+	 * @SuppressWarnings(PHPMD.ShortMethodName) The name is kept for 1.x callers.
+	 */
+	public static function t(string $key, array $values = []): string
+	{
+		Helpers::deprecated(
+			'Higawari\\I18n::t() is deprecated, use Sayamaapps\\Higawari\\I18n::translate()',
+			'i18n-t'
+		);
+		return self::translate($key, $values);
 	}
 
 	/** @return array<string,string> */

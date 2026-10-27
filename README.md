@@ -201,8 +201,7 @@ Kept until 2.0. Nothing breaks; a site moves at its own pace.
 |---|---|---|
 | `higawari.<name>` options (for example `'higawari.active' => true`) | `sayamaapps.higawari.<name>` | Read as a fallback, deprecated. Before this version the short spelling was ignored, so a site that sets it now gets the menu switched on. With Kirby's `debug` option on, a deprecation is raised. The long spelling wins when both are set. |
 | Classes `Higawari\Menu`, `Higawari\Options`, `Higawari\I18n`, `Higawari\Daily`, `Higawari\Panel` | `Sayamaapps\Higawari\…` with the same names | Class aliases in `legacy.php`; no code change needed. |
-
-Renamed in this version, not documented before: `Higawari\I18n::t()` is now `Sayamaapps\Higawari\I18n::translate()`. Only code that calls the class directly is affected.
+| `Higawari\I18n::t()` | `Sayamaapps\Higawari\I18n::translate()` | Wrapper, deprecated. Only code that calls the class directly is affected. |
 
 With Kirby's `debug` option on, a broken option throws `Kirby\Exception\InvalidArgumentException` instead of `InvalidArgumentException`; the message is the same.
 
