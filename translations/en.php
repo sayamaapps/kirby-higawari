@@ -21,10 +21,13 @@ return [
 	'snippet.markers' => 'Markers: {markers}',
 	'snippet.until' => 'Until {date}',
 
-	// Panel texts (blueprints use them as sayamaapps.higawari.panel.*).
+	// Panel texts (blueprints use them as higawari.panel.*).
 	'panel.tab.label' => 'Daily menu',
-	'panel.info.text' => 'Pick the date and enter the dishes, then save. The menu is shown on that day only (or on as many days as the site sets). Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.',
-	'panel.info.until.text' => 'Pick the last day and enter the dishes, then save. The menu is shown up to and including that day. Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.',
+	'panel.info.text' => 'Pick the date and enter the dishes, then save. The menu is shown on that day only '
+		. '(or on as many days as the site sets). Without a date, no menu is shown. '
+		. '“Clear menu” at the top removes all dishes and the date at once.',
+	'panel.info.until.text' => 'Pick the last day and enter the dishes, then save. The menu is shown up to and including that day. '
+		. 'Without a date, no menu is shown. “Clear menu” at the top removes all dishes and the date at once.',
 	'panel.date.label' => 'Valid on',
 	'panel.date.help' => 'The day the dishes are served. Empty: nothing is shown.',
 	'panel.date.until.label' => 'Shown until',

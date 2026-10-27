@@ -2,12 +2,12 @@
 #   tabs:
 #     tageskarte:
 #       extends: higawari/tabs/daily-menu
-label: sayamaapps.higawari.panel.tab.label
+label: higawari.panel.tab.label
 icon: list-bullet
 fields:
   higawariInfo:
     type: info
-    text: sayamaapps.higawari.panel.info.text
+    text: higawari.panel.info.text
   tageskarteDatum:
     extends: higawari/fields/date
   tagesgerichte:

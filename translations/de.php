@@ -20,8 +20,11 @@ return [
 
 	// Texte im Panel.
 	'panel.tab.label' => 'Tageskarte',
-	'panel.info.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird an diesem Tag gezeigt (oder an so vielen Tagen, wie die Website festlegt). Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
-	'panel.info.until.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
+	'panel.info.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird an diesem Tag gezeigt '
+		. '(oder an so vielen Tagen, wie die Website festlegt). Ohne Datum erscheint keine Karte. '
+		. '„Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
+	'panel.info.until.text' => 'Datum wählen, Gerichte eintragen, speichern. Die Karte wird bis einschließlich diesem Tag gezeigt. '
+		. 'Ohne Datum erscheint keine Karte. „Tageskarte leeren“ entfernt alle Gerichte und das Datum auf einmal.',
 	'panel.date.label' => 'Gilt am',
 	'panel.date.help' => 'Der Tag, an dem die Gerichte serviert werden. Leer: es wird nichts gezeigt.',
 	'panel.date.until.label' => 'Anzeigen bis',

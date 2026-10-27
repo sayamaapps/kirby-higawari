@@ -1,7 +1,7 @@
 # Structure field `tagesgerichte`: up to five dishes. Field names are a
 # compatibility promise (README, Content field contract): sites that already
 # store exactly these names keep working unchanged.
-label: sayamaapps.higawari.panel.dishes.label
+label: higawari.panel.dishes.label
 type: structure
 max: 5
 # For the separate package Fude (changes by chat): a bot may replace the whole
@@ -22,26 +22,26 @@ columns:
     width: 1/4
 fields:
   gericht:
-    label: sayamaapps.higawari.panel.dish.name.label
+    label: higawari.panel.dish.name.label
     type: text
     required: true
     maxlength: 160
   beschreibung:
-    label: sayamaapps.higawari.panel.dish.description.label
+    label: higawari.panel.dish.description.label
     type: textarea
     buttons: false
     size: small
     maxlength: 300
-    help: sayamaapps.higawari.panel.dish.description.help
+    help: higawari.panel.dish.description.help
   preis:
-    label: sayamaapps.higawari.panel.dish.price.label
+    label: higawari.panel.dish.price.label
     type: number
     min: 0
     max: 999
     step: 0.01
-    help: sayamaapps.higawari.panel.dish.price.help
+    help: higawari.panel.dish.price.help
   kennzeichnungen:
-    label: sayamaapps.higawari.panel.dish.markers.label
+    label: higawari.panel.dish.markers.label
     type: text
     maxlength: 40
-    help: sayamaapps.higawari.panel.dish.markers.help
+    help: higawari.panel.dish.markers.help
