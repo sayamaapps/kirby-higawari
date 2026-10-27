@@ -33,24 +33,6 @@ function higawari_texts_without_app(): void
 	Kirby\Toolkit\I18n::$load = static fn (string $locale): array => (require dirname(__DIR__) . '/config/translations.php')[$locale] ?? [];
 }
 
-/**
- * Prints the result and exits: 0 when every check passed, 1 otherwise.
- *
- * @deprecated the 1.x standalone runner (tests/run.sh); PHPUnit reports results itself
- * @internal
- */
-function finish(string $suite): never
-{
-	$failures = $GLOBALS['higawariFailures'];
-	$checks = $GLOBALS['higawariChecks'];
-	if ($failures !== []) {
-		fwrite(STDERR, "$suite: " . count($failures) . " of $checks checks failed\n" . implode("\n", $failures) . "\n");
-		exit(1);
-	}
-	echo "$suite: all $checks checks passed\n";
-	exit(0);
-}
-
 /** The callable must throw an instance of $class. */
 function throws(string $class, callable $fn, string $what): void
 {

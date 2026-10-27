@@ -11,6 +11,19 @@ use Sayamaapps\Higawari\Options;
 #[CoversClass(Options::class)]
 final class OptionsPrefixTest extends TestCase
 {
+	public function testExplicitNullGivesTheDefaultWithoutAnError(): void
+	{
+		higawari_with_site([], function (string $tmp): void {
+			$kirby = higawari_kirby($tmp, [
+				'debug' => true,
+				'sayamaapps.higawari.days' => null,
+				'sayamaapps.higawari.timezone' => null,
+			]);
+			expect(1, Options::days($kirby), 'days: null is not set');
+			expect('Europe/Berlin', Options::timezone($kirby), 'timezone: null is not set');
+		});
+	}
+
 	public function testFlatSpellingSwitchesTheMenuOn(): void
 	{
 		higawari_with_site([], function (string $tmp): void {
