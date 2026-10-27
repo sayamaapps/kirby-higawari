@@ -21,6 +21,7 @@ use Kirby\Exception\InvalidArgumentException;
  * of the plugin (Kirby would file them under sayamaapps.higawari.* anyway,
  * but the README documents one place to look).
  *
+ * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
  * @copyright Simon Räder

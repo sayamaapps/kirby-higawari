@@ -20,6 +20,7 @@ use DateTimeZone;
  * or a from-to range for a multi-day window, and a dish description may span
  * several lines.
  *
+ * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
  * @copyright Simon Räder

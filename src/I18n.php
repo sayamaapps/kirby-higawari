@@ -15,6 +15,7 @@ use Kirby\Toolkit\I18n as KirbyI18n;
  * defaults to English. A missing key gives the key itself; tests/I18nTest.php
  * checks that both language files have the same keys.
  *
+ * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
  * @copyright Simon Räder
