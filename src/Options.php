@@ -17,9 +17,8 @@ use Kirby\Exception\InvalidArgumentException;
  * with Kirby's `debug` option on: then it throws, so a developer sees it on the
  * page rather than in the log.
  *
- * Defaults are given here and at the call sites, never in an `options` block
- * of the plugin (Kirby would file them under sayamaapps.higawari.* anyway,
- * but the README documents one place to look).
+ * Defaults are given at each read (get() and its callers). The `options` block
+ * of the plugin (config/options.php) only declares the keys, with null.
  *
  * @package   Kirby Higawari
  * @author    Simon Räder
