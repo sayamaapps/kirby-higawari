@@ -53,13 +53,30 @@ class Menu
 	public const MODES = [self::MODE_FROM, self::MODE_UNTIL];
 
 	/**
+	 * A price from the Panel as a decimal with a point and two places, as
+	 * schema.org wants it: "7,5" gives "7.50". Empty gives '' (no price), an
+	 * unreadable price null (the same check as formatPrice()).
+	 */
+	public static function amount(string $value): string|null
+	{
+		$value = str_replace(',', '.', trim($value));
+		if ($value === '') {
+			return '';
+		}
+		if (!preg_match('/^\d{1,3}(?:\.\d{1,2})?$/D', $value) || (float)$value > 999) {
+			return null;
+		}
+		return number_format((float)$value, 2, '.', '');
+	}
+
+	/**
 	 * The card to show at $now, or null when the menu is not valid that day or
 	 * has no usable dish. In mode `until` `from` is today (in $timezone): the
 	 * card starts being shown on the day it is read.
 	 *
 	 * @param list<array<string, mixed>> $rows
 	 * @param non-empty-string $timezone
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}>}|null
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>}|null
 	 */
 	public static function card(
 		string $date,
@@ -88,7 +105,7 @@ class Menu
 	 * price, such as „mit Wiener“: null without a variant name, and null when
 	 * its price cannot be read (the dish stays, with its own price only).
 	 *
-	 * @return array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}|null
+	 * @return array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}|null
 	 */
 	private static function dish(mixed $row, string $currency): array|null
 	{
@@ -108,6 +125,7 @@ class Menu
 			'name' => $name,
 			'lines' => self::lines(is_string($row['beschreibung'] ?? null) ? $row['beschreibung'] : ''),
 			'price' => $price,
+			'amount' => (string)self::amount((string)$raw),
 			'markers' => is_string($row['kennzeichnungen'] ?? null) ? trim($row['kennzeichnungen']) : '',
 			'variant' => self::variant($row, $currency),
 		];
@@ -122,7 +140,7 @@ class Menu
 	 * A row without a name is skipped, as is a row whose price cannot be read.
 	 * Imported content without Panel validation is handled the same way.
 	 *
-	 * @return list<array{name: string, lines: list<string>, price: string, markers: string, variant: array{label: string, price: string}|null}>
+	 * @return list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>
 	 */
 	public static function dishes(array $rows, string $currency = '€'): array
 	{
@@ -161,14 +179,11 @@ class Menu
 	 */
 	public static function formatPrice(string $value, string $currency = '€'): string|null
 	{
-		$value = str_replace(',', '.', trim($value));
-		if ($value === '') {
-			return '';
+		$amount = self::amount($value);
+		if (in_array($amount, [null, ''], true)) {
+			return $amount;
 		}
-		if (!preg_match('/^\d{1,3}(?:\.\d{1,2})?$/D', $value) || (float)$value > 999) {
-			return null;
-		}
-		$formatted = number_format((float)$value, 2, ',', '.');
+		$formatted = number_format((float)$amount, 2, ',', '.');
 		return $currency === '' ? $formatted : $formatted . ' ' . $currency;
 	}
 
@@ -226,7 +241,7 @@ class Menu
 	/**
 	 * The variant of a dish row: name and formatted price ('' for none), or null.
 	 *
-	 * @return array{label: string, price: string}|null
+	 * @return array{label: string, price: string, amount: string}|null
 	 */
 	private static function variant(array $row, string $currency): array|null
 	{
@@ -236,7 +251,7 @@ class Menu
 			return null;
 		}
 		$price = self::formatPrice((string)$raw, $currency);
-		return $price === null ? null : ['label' => $label, 'price' => $price];
+		return $price === null ? null : ['label' => $label, 'price' => $price, 'amount' => (string)self::amount((string)$raw)];
 	}
 
 	/**

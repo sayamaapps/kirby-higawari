@@ -26,6 +26,7 @@ Kirby::plugin(
 		'snippets'     => require __DIR__ . '/config/snippets.php',
 		'blueprints'   => require __DIR__ . '/config/blueprints.php',
 		'pageMethods'  => require __DIR__ . '/config/page-methods.php',
+		'hooks'        => require __DIR__ . '/config/hooks.php',
 	],
 	root: __DIR__
 );

@@ -7,9 +7,11 @@
  */
 
 return [
+	'sayamaapps\\higawari\\cache' => 'src/Cache.php',
 	'sayamaapps\\higawari\\daily' => 'src/Daily.php',
 	'sayamaapps\\higawari\\i18n' => 'src/I18n.php',
 	'sayamaapps\\higawari\\menu' => 'src/Menu.php',
 	'sayamaapps\\higawari\\options' => 'src/Options.php',
 	'sayamaapps\\higawari\\panel' => 'src/Panel.php',
+	'sayamaapps\\higawari\\schema' => 'src/Schema.php',
 ];

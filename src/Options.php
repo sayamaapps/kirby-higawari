@@ -40,10 +40,38 @@ class Options
 		return self::get($kirby, 'active', false) === true;
 	}
 
+	/**
+	 * `sayamaapps.higawari.annai`: which page's menu goes into Annai's business
+	 * node as `hasMenu` (Daily::annai()). `true` (default) the home page, a
+	 * page id, or `false` for none.
+	 */
+	private static function annai(App $kirby): string|bool
+	{
+		$value = self::get($kirby, 'annai', true);
+		if (is_bool($value)) {
+			return $value;
+		}
+		if (is_string($value) && trim($value) !== '') {
+			return trim($value, ' /');
+		}
+		self::invalid($kirby, 'Higawari: sayamaapps.higawari.annai must be true, false or a page id — using true.');
+		return true;
+	}
+
 	/** Sets I18n's language for this request. Called before any text is produced. */
 	public static function applyLanguage(App $kirby): void
 	{
 		I18n::setLanguage(self::language($kirby));
+	}
+
+	/**
+	 * `sayamaapps.higawari.cache`: `true` lets Kirby's page cache keep a page
+	 * with the snippet until Daily::cacheUntil(); `false` (default) keeps it
+	 * out of the cache, as before.
+	 */
+	private static function cache(App $kirby): bool
+	{
+		return self::get($kirby, 'cache', false) === true;
 	}
 
 	/** `sayamaapps.higawari.currency`: the symbol after a price. '' shows bare numbers ("7,50"). */
@@ -151,6 +179,42 @@ class Options
 	public static function note(App $kirby): string|null
 	{
 		return self::text($kirby, 'note');
+	}
+
+	/**
+	 * The options of the JSON-LD, the Annai hook and the cache, read together:
+	 * `annai` (annai()), `cache` (cache()) and `priceCurrency` (priceCurrency()).
+	 *
+	 * @return array{annai: string|bool, cache: bool, priceCurrency: string}
+	 */
+	public static function output(App $kirby): array
+	{
+		return [
+			'annai' => self::annai($kirby),
+			'cache' => self::cache($kirby),
+			'priceCurrency' => self::priceCurrency($kirby),
+		];
+	}
+
+	/**
+	 * `sayamaapps.higawari.priceCurrency`: the ISO 4217 code of the JSON-LD
+	 * prices. Default: EUR for the currency `€`, the currency itself when it
+	 * is three letters (`CHF`), else '' (no priceCurrency).
+	 */
+	private static function priceCurrency(App $kirby): string
+	{
+		$value = self::get($kirby, 'priceCurrency');
+		if (is_string($value) && preg_match('/^[A-Za-z]{3}$/D', trim($value)) === 1) {
+			return strtoupper(trim($value));
+		}
+		if ($value !== null) {
+			self::invalid($kirby, 'Higawari: sayamaapps.higawari.priceCurrency must be a three-letter ISO 4217 code — using the currency.');
+		}
+		$currency = self::currency($kirby);
+		if ($currency === '€') {
+			return 'EUR';
+		}
+		return preg_match('/^[A-Za-z]{3}$/D', $currency) === 1 ? strtoupper($currency) : '';
 	}
 
 	/** A trimmed, non-empty string, else null. Not an error when unset. */
