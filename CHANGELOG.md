@@ -8,6 +8,29 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.7.0] — 2026-11-06
+
+### Added
+
+- **JSON-LD of the menu:** the snippet `higawari/schema` prints a schema.org
+  `Menu` with one `MenuSection` („Tageskarte <date>“) and a `MenuItem` per
+  dish (description from the further lines, `offers` with `price` as a decimal
+  with a point and `priceCurrency`), only while a card is valid. A variant with
+  its own price is a second `Offer` of the same item. Page method
+  `higawariSchema()`, option `priceCurrency`.
+- **Annai:** with Annai 2.6+ today's menu goes into the business node as
+  `hasMenu` (Annai's hook `sayamaapps.annai.business`). No dependency on Annai.
+  Option `annai` (`true` home page, a page id, `false`).
+- **Caching:** `Cache::until()`, `Daily::cacheUntil()` and the page method
+  `higawariCacheUntil()` give the moment the menu output changes. With the new
+  option `cache` (`true`) the snippets set it as Kirby's page cache expiry
+  instead of turning the cache off.
+- Each dish from `higawariCard()` has the key `amount` (`'6.90'`, `''` without
+  a price), its variant too.
+
+The default output is unchanged: without `cache` the snippet still keeps the
+page out of Kirby's page cache.
+
 ## [1.6.0] — 2026-10-27
 
 ### Added

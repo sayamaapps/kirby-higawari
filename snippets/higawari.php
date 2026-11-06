@@ -24,12 +24,13 @@ if (!Options::active(kirby())) {
 Options::applyLanguage(kirby());
 $mode = Options::dateMode(kirby());
 
-// The menu changes with the clock: Kirby's page cache must not keep this page,
-// not even in the state where nothing is shown today.
-kirby()->response()->cache(false);
-
 $source ??= page();
 $now ??= null;
+
+// The menu changes with the clock: by default Kirby's page cache must not keep
+// this page, not even in the state where nothing is shown today. With
+// sayamaapps.higawari.cache on, it may keep it until the next change of date.
+Daily::cacheResponse(kirby(), $source, $now);
 
 $card = $source !== null ? Daily::card(kirby(), $source, $now) : null;
 $empty = $card === null ? Options::emptyText(kirby()) : null;

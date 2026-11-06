@@ -58,6 +58,9 @@ All options are read as `sayamaapps.higawari.<name>`, flat or nested. The short 
 | `currency` | `€` | Shown after a price, with a space: `7,50 €`. An empty string shows bare numbers: `7,50`. |
 | `emptyText` | `null` | Shown in place of the menu when none is valid. `null` shows nothing. |
 | `note` | `null` | A line under the dishes, for example about prices or allergens. |
+| `cache` | `false` | `true` lets Kirby's page cache keep a page with the menu until the next change of date (see [Caching](#caching)). `false` keeps it out of the cache. |
+| `priceCurrency` | from `currency` | ISO 4217 code of the JSON-LD prices. Default: `EUR` for `€`, a three-letter `currency` as it is, else none. |
+| `annai` | `true` | Which page's menu goes into [Annai](#annai)'s business node: `true` the home page, a page id, `false` none. |
 | `language` | site language | `de` or `en`, for the snippet and Panel texts. Otherwise the default language, then the first two letters of `locale`, then English. |
 
 ## Content field contract
@@ -150,9 +153,53 @@ Markup, with classes only and no inline style:
 
 With `dateMode` `until`, the line reads `Bis einschließlich Samstag, 10.10.2026` (English: `Until Saturday, 10 October 2026`), and its `datetime` is the last day.
 
-With nothing valid, the snippet prints nothing, or only `<p class="higawari-leer">` with the `emptyText` option. Every value is escaped. The page is never cached by Kirby, because the menu depends on the clock. To change the markup, create `site/snippets/higawari.php`; Kirby uses it instead.
+With nothing valid, the snippet prints nothing, or only `<p class="higawari-leer">` with the `emptyText` option. Every value is escaped. By default the page is not cached by Kirby, because the menu depends on the clock (see [Caching](#caching)). To change the markup, create `site/snippets/higawari.php`; Kirby uses it instead.
 
 No CSS is shipped. The classes are the hooks for your own stylesheet.
+
+## JSON-LD
+
+`snippet('higawari/schema')` prints the menu as one `<script type="application/ld+json">`, only while a card is valid (same variables as the menu snippet: `source`, `now`). `$page->higawariSchema()` returns the array, or null.
+
+```json
+{"@context": "https://schema.org", "@type": "Menu", "@id": "https://example.com/#tageskarte", "name": "Tageskarte",
+ "hasMenuSection": {"@type": "MenuSection", "name": "Tageskarte Samstag, 10.10.2026", "hasMenuItem": [
+   {"@type": "MenuItem", "name": "Kartoffelsuppe", "description": "mit Brot, und Kräutern",
+    "offers": {"@type": "Offer", "price": "6.90", "priceCurrency": "EUR"}},
+   {"@type": "MenuItem", "name": "Linseneintopf", "offers": [
+     {"@type": "Offer", "price": "9.90", "priceCurrency": "EUR"},
+     {"@type": "Offer", "name": "Linseneintopf mit Wiener", "price": "11.50", "priceCurrency": "EUR"}]}]}}
+```
+
+- Prices are decimals with a point, two places. A dish without a price has no `offers`.
+- The further lines are the `description`, joined with ", ". Markers are not part of it.
+- **A variant with its own price is a second `Offer` of the same `MenuItem`**, named after dish and variant, so `offers` becomes a list: one dish, two servings. A variant without a price adds no `Offer`.
+
+### Annai
+
+With [Annai](https://github.com/sayamaapps/kirby-annai) 2.6 or newer installed and active, today's menu also goes into its business node as `hasMenu`, through Annai's hook `sayamaapps.annai.business`. Higawari does not depend on Annai: without it the hook is never called. A `hasMenu` set in Annai's options wins. Turn it off with `'sayamaapps.higawari.annai' => false`, or name the page with the menu: `'sayamaapps.higawari.annai' => 'mittagstisch'`.
+
+## Caching
+
+The menu changes only with the date or a Panel save, which flushes Kirby's page cache. So a page with the menu can be cached until the next midnight, or while a card is valid until the midnight after its last day. `$page->higawariCacheUntil()` (or `Sayamaapps\Higawari\Daily::cacheUntil($kirby, $page)`) returns that moment as a Unix time.
+
+Switch it on for the snippets:
+
+```php
+// site/config/config.php
+return [
+    'cache' => ['pages' => ['active' => true]],
+    'sayamaapps.higawari.cache' => true,
+];
+```
+
+Or set it in a template that prints the menu itself:
+
+```php
+<?php kirby()->response()->expires($page->higawariCacheUntil()) ?>
+```
+
+Kirby keeps the earliest expiry of a response, so another snippet can only shorten it.
 
 ## Page method
 
@@ -161,8 +208,8 @@ $card = $page->higawariCard();                    // now, in the configured zone
 // [
 //     'from' => '2026-10-10', 'to' => '2026-10-10',   // mode until: from is today, to the date
 //     'dishes' => [
-//         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'markers' => 'V, L',
-//          'variant' => ['label' => 'mit Wiener', 'price' => '8,40 €']],   // or null
+//         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'amount' => '6.90', 'markers' => 'V, L',
+//          'variant' => ['label' => 'mit Wiener', 'price' => '8,40 €', 'amount' => '8.40']],   // or null
 //     ],
 // ]
 // or null: plugin off, not valid that day, or no usable dish
