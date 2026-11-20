@@ -14,4 +14,5 @@ return [
 	'sayamaapps\\higawari\\options' => 'src/Options.php',
 	'sayamaapps\\higawari\\panel' => 'src/Panel.php',
 	'sayamaapps\\higawari\\schema' => 'src/Schema.php',
+	'sayamaapps\\higawari\\time' => 'src/Time.php',
 ];

@@ -17,9 +17,13 @@ fude:
   readImages: true
 columns:
   gericht:
-    width: 3/4
+    width: 1/2
+  zeit:
+    width: 1/6
+  uhrzeit:
+    width: 1/6
   preis:
-    width: 1/4
+    width: 1/6
 fields:
   gericht:
     label: higawari.panel.dish.name.label
@@ -59,3 +63,26 @@ fields:
     type: text
     maxlength: 40
     help: higawari.panel.dish.markers.help
+  # Time of day (1.8): `bis` is gone from `uhrzeit` on (a lunch dish), `ab`
+  # is shown all day with „ab … Uhr“. Values are part of the field contract.
+  # Option texts as language arrays: Kirby does not resolve translation keys
+  # in the options of a structure's sub-field.
+  zeit:
+    label: higawari.panel.dish.time.label
+    type: toggles
+    default: ganztags
+    width: 1/2
+    options:
+      - value: ganztags
+        text: {de: Ganztags, en: All day}
+      - value: bis
+        text: {de: Bis, en: Until}
+      - value: ab
+        text: {de: Ab, en: From}
+    help: higawari.panel.dish.time.help
+  uhrzeit:
+    label: higawari.panel.dish.clock.label
+    type: time
+    default: "15:00"
+    width: 1/2
+    help: higawari.panel.dish.clock.help

@@ -59,12 +59,28 @@ final class BlueprintsTest extends TestCase
 				expect('date', $fields['tageskartedatum']['type'] ?? null, "$language: date is a date field");
 				expect($dishes, $fields['tagesgerichte']['label'] ?? null, "$language: dishes label");
 				expect(5, $fields['tagesgerichte']['max'] ?? null, "$language: at most five dishes");
-				expect(['gericht', 'beschreibung', 'preis', 'variante', 'variantenpreis', 'kennzeichnungen'], array_keys($fields['tagesgerichte']['fields'] ?? []), "$language: dish fields");
+				expect(['gericht', 'beschreibung', 'preis', 'variante', 'variantenpreis', 'kennzeichnungen', 'zeit', 'uhrzeit'], array_keys($fields['tagesgerichte']['fields'] ?? []), "$language: dish fields");
 				expect($dish, $fields['tagesgerichte']['fields']['gericht']['label'] ?? null, "$language: name label");
 				expect($markers, $fields['tagesgerichte']['fields']['kennzeichnungen']['label'] ?? null, "$language: markers label");
+				// 1.8: time of day per dish, and the note line under the menu.
+				$zeit = $fields['tagesgerichte']['fields']['zeit'] ?? [];
+				expect('toggles', $zeit['type'] ?? null, "$language: time is a toggles field");
+				expect(['ganztags', 'bis', 'ab'], array_column($zeit['options'] ?? [], 'value'), "$language: time values");
+				expect(
+					$language === 'de' ? ['Ganztags', 'Bis', 'Ab'] : ['All day', 'Until', 'From'],
+					array_column($zeit['options'] ?? [], 'text'),
+					"$language: time option texts",
+				);
+				expect('ganztags', $zeit['default'] ?? null, "$language: time defaults to all day");
+				expect('time', $fields['tagesgerichte']['fields']['uhrzeit']['type'] ?? null, "$language: time of day is a time field");
+				expect(
+					$language === 'de' ? 'Hinweis unter der Karte (optional)' : 'Note under the menu (optional)',
+					$fields['tageskartehinweis']['label'] ?? null,
+					"$language: note label",
+				);
 				expect(
 					[],
-					higawari_leaks(array_intersect_key($fields, array_flip(['tageskartedatum', 'tagesgerichte', 'higawariinfo']))),
+					higawari_leaks(array_intersect_key($fields, array_flip(['tageskartedatum', 'tagesgerichte', 'higawariinfo', 'tageskartehinweis']))),
 					"$language: no untranslated key in the tab",
 				);
 			}

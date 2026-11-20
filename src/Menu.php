@@ -20,6 +20,11 @@ use DateTimeZone;
  * or a from-to range for a multi-day window, and a dish description may span
  * several lines.
  *
+ * A dish may carry a time of day (`zeit`, `uhrzeit`): `bis` 15:00 is served
+ * until then and is gone from 15:00 on, every day of the window (a lunch dish);
+ * `ab` 15:00 is shown all day with the note „ab 15 Uhr“. Without a readable
+ * time a dish is shown all day.
+ *
  * @package   Kirby Higawari
  * @author    Simon Räder
  * @link      https://github.com/sayamaapps/kirby-higawari
@@ -39,6 +44,9 @@ class Menu
 	/** Content field names. Sites already using them need no migration. */
 	public const FIELD_DATE = 'tageskarteDatum';
 	public const FIELD_DISHES = 'tagesgerichte';
+	/** Optional line under the dishes, kept when the menu is cleared. */
+	public const FIELD_NOTE = 'tageskarteHinweis';
+
 
 	/** Dishes shown at most; the blueprint allows the same number. */
 	public const MAX_DISHES = 5;
@@ -72,11 +80,13 @@ class Menu
 	/**
 	 * The card to show at $now, or null when the menu is not valid that day or
 	 * has no usable dish. In mode `until` `from` is today (in $timezone): the
-	 * card starts being shown on the day it is read.
+	 * card starts being shown on the day it is read. A dish `bis` a time is left
+	 * out from that time on ($now in $timezone); when that leaves no dish, the
+	 * card is null.
 	 *
 	 * @param list<array<string, mixed>> $rows
 	 * @param non-empty-string $timezone
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>}|null
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>}|null
 	 */
 	public static function card(
 		string $date,
@@ -91,7 +101,11 @@ class Menu
 		if ($window === null || !self::validOn($date, $now, $days, $timezone, $mode)) {
 			return null;
 		}
-		$dishes = self::dishes($rows, $currency);
+		$clock = $now->setTimezone(new DateTimeZone($timezone))->format('H:i');
+		$dishes = array_values(array_filter(
+			self::dishes($rows, $currency),
+			static fn (array $dish): bool => !Time::over($dish['time'], $clock),
+		));
 		if ($dishes === []) {
 			return null;
 		}
@@ -105,7 +119,7 @@ class Menu
 	 * price, such as „mit Wiener“: null without a variant name, and null when
 	 * its price cannot be read (the dish stays, with its own price only).
 	 *
-	 * @return array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}|null
+	 * @return array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}|null
 	 */
 	private static function dish(mixed $row, string $currency): array|null
 	{
@@ -128,6 +142,7 @@ class Menu
 			'amount' => (string)self::amount((string)$raw),
 			'markers' => is_string($row['kennzeichnungen'] ?? null) ? trim($row['kennzeichnungen']) : '',
 			'variant' => self::variant($row, $currency),
+			'time' => Time::fromRow($row),
 		];
 	}
 
@@ -140,7 +155,7 @@ class Menu
 	 * A row without a name is skipped, as is a row whose price cannot be read.
 	 * Imported content without Panel validation is handled the same way.
 	 *
-	 * @return list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>
+	 * @return list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>
 	 */
 	public static function dishes(array $rows, string $currency = '€'): array
 	{

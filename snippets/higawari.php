@@ -17,6 +17,7 @@ use Sayamaapps\Higawari\Daily;
 use Sayamaapps\Higawari\I18n;
 use Sayamaapps\Higawari\Menu;
 use Sayamaapps\Higawari\Options;
+use Sayamaapps\Higawari\Time;
 
 if (!Options::active(kirby())) {
 	return;
@@ -37,7 +38,7 @@ $empty = $card === null ? Options::emptyText(kirby()) : null;
 if ($card === null && $empty === null) {
 	return;
 }
-$note = Options::note(kirby());
+$note = Daily::note(kirby(), $source);
 ?>
 <section class="higawari" aria-labelledby="higawari-titel">
 	<h2 class="higawari-titel" id="higawari-titel"><?= esc(I18n::translate('snippet.heading')) ?></h2>
@@ -49,8 +50,12 @@ $label = Menu::label($card['from'], $card['to'], $mode);
 	<p class="higawari-gilt"><time datetime="<?= esc($datetime) ?>"><?= esc($label) ?></time></p>
 	<ul class="higawari-gerichte">
 <?php foreach ($card['dishes'] as $dish) : ?>
-		<li class="higawari-gericht">
+<?php $time = $dish['time'] ?>
+		<li class="higawari-gericht<?= $time !== null ? ' higawari-gericht-' . ($time['mode'] === 'until' ? 'bis' : 'ab') : '' ?>">
 			<span class="higawari-name"><?= esc($dish['name']) ?></span>
+<?php if ($time !== null) : ?>
+			<span class="higawari-zeit"><?= esc(Time::label($time)) ?></span>
+<?php endif ?>
 <?php if ($dish['price'] !== '') : ?>
 			<span class="higawari-preis"><?= esc($dish['price']) ?></span>
 <?php endif ?>

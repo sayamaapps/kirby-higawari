@@ -70,6 +70,7 @@ class Daily
 			$mode === Menu::MODE_FROM ? Options::days($kirby) : Options::DEFAULT_DAYS,
 			$zone,
 			$mode,
+			$page->{Menu::FIELD_DISHES}()->yaml(),
 		);
 	}
 
@@ -78,7 +79,7 @@ class Daily
 	 * or null when the plugin is off, the menu is not valid that day or it has
 	 * no usable dish. Nothing is cached: the answer changes with the clock.
 	 *
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>}|null
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>}|null
 	 */
 	public static function card(App $kirby, Page $page, DateTimeImmutable|null $now = null): array|null
 	{
@@ -98,6 +99,16 @@ class Daily
 			Options::currency($kirby),
 			$mode,
 		);
+	}
+
+	/**
+	 * The line under the dishes: the page field `tageskarteHinweis`, or, when
+	 * it is empty, the option `note`. Null shows nothing.
+	 */
+	public static function note(App $kirby, Page|null $page): string|null
+	{
+		$field = $page !== null ? trim((string)$page->{Menu::FIELD_NOTE}()->value()) : '';
+		return $field !== '' ? $field : Options::note($kirby);
 	}
 
 	/**
