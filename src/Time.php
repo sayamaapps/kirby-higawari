@@ -22,8 +22,8 @@ final class Time
 {
 	/** Values of the dish field `zeit`; empty or anything else means all day. */
 	public const ALL_DAY = 'ganztags';
-	public const UNTIL = 'bis';
 	public const FROM = 'ab';
+	public const UNTIL = 'bis';
 
 	/**
 	 * A time of day as `HH:MM`: "15:00", "9:30" and Kirby's stored "15:00:00"
@@ -36,6 +36,57 @@ final class Time
 		}
 		[$hour, $minute] = [(int)$match[1], (int)$match[2]];
 		return $hour > 23 || $minute > 59 ? null : sprintf('%02d:%02d', $hour, $minute);
+	}
+
+	/**
+	 * The time of a dish row: null for all day (`zeit` empty, `ganztags` or
+	 * unknown, or `uhrzeit` not a time), else `until` or `from` with `at` as
+	 * `HH:MM`.
+	 *
+	 * @return array{mode: 'until'|'from', at: string}|null
+	 */
+	public static function fromRow(array $row): array|null
+	{
+		$value = is_string($row['zeit'] ?? null) ? strtolower(trim($row['zeit'])) : '';
+		$mode = match ($value) {
+			self::UNTIL => 'until',
+			self::FROM => 'from',
+			default => null,
+		};
+		$raw = $row['uhrzeit'] ?? '';
+		$at = is_string($raw) ? self::clock($raw) : null;
+		return $mode === null || $at === null ? null : ['mode' => $mode, 'at' => $at];
+	}
+
+	/**
+	 * Does any dish carry a `bis` time? Then the output can change during the
+	 * day, and on every day of the window again at midnight.
+	 *
+	 * @param list<array<string, mixed>> $rows
+	 */
+	public static function hasUntil(array $rows): bool
+	{
+		foreach (Menu::dishes($rows) as $dish) {
+			if ($dish['time'] !== null && $dish['time']['mode'] === 'until') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The note beside a dish with a time: „bis 15 Uhr“, „ab 14:30 Uhr“
+	 * (English: „until 15:00“, „from 14:30“).
+	 *
+	 * @param array{mode: 'until'|'from', at: string} $time
+	 */
+	public static function label(array $time): string
+	{
+		[$hour, $minute] = explode(':', $time['at']);
+		$shown = $minute === '00'
+			? I18n::translate('format.time.hour', ['hour' => (string)(int)$hour])
+			: I18n::translate('format.time', ['hour' => (string)(int)$hour, 'minute' => $minute]);
+		return I18n::translate($time['mode'] === 'until' ? 'snippet.time.until' : 'snippet.time.from', ['time' => $shown]);
 	}
 
 	/**
@@ -69,56 +120,5 @@ final class Time
 	public static function over(array|null $time, string $clock): bool
 	{
 		return $time !== null && $time['mode'] === 'until' && $clock >= $time['at'];
-	}
-
-	/**
-	 * Does any dish carry a `bis` time? Then the output can change during the
-	 * day, and on every day of the window again at midnight.
-	 *
-	 * @param list<array<string, mixed>> $rows
-	 */
-	public static function hasUntil(array $rows): bool
-	{
-		foreach (Menu::dishes($rows) as $dish) {
-			if ($dish['time'] !== null && $dish['time']['mode'] === 'until') {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * The time of a dish row: null for all day (`zeit` empty, `ganztags` or
-	 * unknown, or `uhrzeit` not a time), else `until` or `from` with `at` as
-	 * `HH:MM`.
-	 *
-	 * @return array{mode: 'until'|'from', at: string}|null
-	 */
-	public static function fromRow(array $row): array|null
-	{
-		$value = is_string($row['zeit'] ?? null) ? strtolower(trim($row['zeit'])) : '';
-		$mode = match ($value) {
-			self::UNTIL => 'until',
-			self::FROM => 'from',
-			default => null,
-		};
-		$raw = $row['uhrzeit'] ?? '';
-		$at = is_string($raw) ? self::clock($raw) : null;
-		return $mode === null || $at === null ? null : ['mode' => $mode, 'at' => $at];
-	}
-
-	/**
-	 * The note beside a dish with a time: „bis 15 Uhr“, „ab 14:30 Uhr“
-	 * (English: „until 15:00“, „from 14:30“).
-	 *
-	 * @param array{mode: 'until'|'from', at: string} $time
-	 */
-	public static function label(array $time): string
-	{
-		[$hour, $minute] = explode(':', $time['at']);
-		$shown = $minute === '00'
-			? I18n::translate('format.time.hour', ['hour' => (string)(int)$hour])
-			: I18n::translate('format.time', ['hour' => (string)(int)$hour, 'minute' => $minute]);
-		return I18n::translate($time['mode'] === 'until' ? 'snippet.time.until' : 'snippet.time.from', ['time' => $shown]);
 	}
 }

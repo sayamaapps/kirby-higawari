@@ -24,6 +24,12 @@ final class TimeTest extends TestCase
 		['gericht' => 'Suppe', 'preis' => '7', 'zeit' => 'ganztags', 'uhrzeit' => '15:00:00'],
 	];
 
+	/** @return list<string> */
+	private static function names(array|null $card): array
+	{
+		return $card === null ? [] : array_column($card['dishes'], 'name');
+	}
+
 	protected function setUp(): void
 	{
 		higawari_texts_without_app();
@@ -35,44 +41,25 @@ final class TimeTest extends TestCase
 		App::destroy();
 	}
 
-	/** @return list<string> */
-	private static function names(array|null $card): array
+	public function testCache(): void
 	{
-		return $card === null ? [] : array_column($card['dishes'], 'name');
-	}
-
-	public function testClock(): void
-	{
-		foreach (['15:00' => '15:00', '9:30' => '09:30', '15:00:00' => '15:00', ' 07:05 ' => '07:05', '23:59' => '23:59', '0:00' => '00:00'] as $in => $out) {
-			expect($out, Time::clock($in), "clock('$in')");
-		}
-		foreach (['', '15', '15 Uhr', '24:00', '15:60', '1500', '15:0', 'ab 15:00', '15:00:00:00'] as $in) {
-			expect(null, Time::clock($in), "not a time: '$in'");
-		}
-	}
-
-	public function testDishTime(): void
-	{
-		$dishes = Menu::dishes(self::ROWS);
-		expect(['mode' => 'until', 'at' => '15:00'], $dishes[0]['time'], 'bis 15:00 from Kirby storage (15:00:00)');
-		expect(['mode' => 'from', 'at' => '15:00'], $dishes[1]['time'], 'ab 15:00');
-		expect(null, $dishes[2]['time'], 'ganztags: no time even with a stored time of day');
-
-		// Anything not readable is all day: the dish is shown rather than lost.
-		$odd = Menu::dishes([
-			['gericht' => 'A', 'zeit' => 'bis'],
-			['gericht' => 'B', 'zeit' => 'bis', 'uhrzeit' => ''],
-			['gericht' => 'C', 'zeit' => 'bis', 'uhrzeit' => '25:00'],
-			['gericht' => 'D', 'zeit' => 'mittags', 'uhrzeit' => '15:00'],
-			['gericht' => 'E', 'uhrzeit' => '15:00'],
-		]);
-		expect([null, null, null, null, null], array_column($odd, 'time'), 'bis without a readable time, unknown zeit, no zeit: all day');
-		$more = Menu::dishes([
-			['gericht' => 'F', 'zeit' => ' BIS ', 'uhrzeit' => '14:30'],
-			['gericht' => 'G', 'zeit' => ['bis'], 'uhrzeit' => 900],
-		]);
-		expect(['mode' => 'until', 'at' => '14:30'], $more[0]['time'], 'zeit is trimmed and case-insensitive');
-		expect(null, $more[1]['time'], 'non-string values: all day');
+		$ts = fn (string $when): int => at($when)->getTimestamp();
+		// The day itself: expires when the lunch dish goes, then at midnight.
+		expect($ts('2026-11-20 15:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'morning: until 15:00');
+		expect($ts('2026-11-20 15:00'), Cache::until('2026-11-20', at('2026-11-20 14:59:59'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), '14:59:59: until 15:00');
+		expect($ts('2026-11-21 00:00'), Cache::until('2026-11-20', at('2026-11-20 15:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), '15:00: until midnight');
+		// Several days: not the end of the window, because the dish is back tomorrow.
+		expect($ts('2026-11-21 00:00'), Cache::until('2026-11-20', at('2026-11-20 16:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'three days, afternoon: next midnight');
+		expect($ts('2026-11-21 15:00'), Cache::until('2026-11-20', at('2026-11-21 08:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'three days, second morning: 15:00');
+		// Only `ab` and all-day dishes: as in 1.7, the end of the window.
+		$noUntil = [self::ROWS[1], self::ROWS[2]];
+		expect($ts('2026-11-23 00:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, $noUntil), 'ab only: end of window');
+		expect($ts('2026-11-23 00:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 3), 'no rows given: as before');
+		// Not valid today: next midnight, the time does not matter.
+		expect($ts('2026-11-20 00:00'), Cache::until('2026-11-20', at('2026-11-19 10:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'day before: midnight');
+		expect(null, Time::nextChange(self::ROWS, at('2026-11-20 15:00')), 'no change after 15:00');
+		expect(at('2026-11-20 15:00')->getTimestamp(), Time::nextChange(self::ROWS, at('2026-11-20 08:00'))?->getTimestamp(), 'next change 15:00');
+		holds(Time::hasUntil(self::ROWS) && !Time::hasUntil($noUntil), 'hasUntilTime');
 	}
 
 	public function testCardOverTheDay(): void
@@ -125,6 +112,40 @@ final class TimeTest extends TestCase
 		expect(['Suppe'], self::names(Menu::card('2026-11-20', $old, at('2026-11-20 23:00'))), '1.7 content: shown all day');
 	}
 
+	public function testClock(): void
+	{
+		foreach (['15:00' => '15:00', '9:30' => '09:30', '15:00:00' => '15:00', ' 07:05 ' => '07:05', '23:59' => '23:59', '0:00' => '00:00'] as $in => $out) {
+			expect($out, Time::clock($in), "clock('$in')");
+		}
+		foreach (['', '15', '15 Uhr', '24:00', '15:60', '1500', '15:0', 'ab 15:00', '15:00:00:00'] as $in) {
+			expect(null, Time::clock($in), "not a time: '$in'");
+		}
+	}
+
+	public function testDishTime(): void
+	{
+		$dishes = Menu::dishes(self::ROWS);
+		expect(['mode' => 'until', 'at' => '15:00'], $dishes[0]['time'], 'bis 15:00 from Kirby storage (15:00:00)');
+		expect(['mode' => 'from', 'at' => '15:00'], $dishes[1]['time'], 'ab 15:00');
+		expect(null, $dishes[2]['time'], 'ganztags: no time even with a stored time of day');
+
+		// Anything not readable is all day: the dish is shown rather than lost.
+		$odd = Menu::dishes([
+			['gericht' => 'A', 'zeit' => 'bis'],
+			['gericht' => 'B', 'zeit' => 'bis', 'uhrzeit' => ''],
+			['gericht' => 'C', 'zeit' => 'bis', 'uhrzeit' => '25:00'],
+			['gericht' => 'D', 'zeit' => 'mittags', 'uhrzeit' => '15:00'],
+			['gericht' => 'E', 'uhrzeit' => '15:00'],
+		]);
+		expect([null, null, null, null, null], array_column($odd, 'time'), 'bis without a readable time, unknown zeit, no zeit: all day');
+		$more = Menu::dishes([
+			['gericht' => 'F', 'zeit' => ' BIS ', 'uhrzeit' => '14:30'],
+			['gericht' => 'G', 'zeit' => ['bis'], 'uhrzeit' => 900],
+		]);
+		expect(['mode' => 'until', 'at' => '14:30'], $more[0]['time'], 'zeit is trimmed and case-insensitive');
+		expect(null, $more[1]['time'], 'non-string values: all day');
+	}
+
 	public function testLabel(): void
 	{
 		expect('bis 15 Uhr', Time::label(['mode' => 'until', 'at' => '15:00']), 'full hour without minutes');
@@ -133,26 +154,5 @@ final class TimeTest extends TestCase
 		I18n::setLanguage('en');
 		expect('until 15:00', Time::label(['mode' => 'until', 'at' => '15:00']), 'English full hour');
 		expect('from 9:30', Time::label(['mode' => 'from', 'at' => '09:30']), 'English with minutes');
-	}
-
-	public function testCache(): void
-	{
-		$ts = fn (string $when): int => at($when)->getTimestamp();
-		// The day itself: expires when the lunch dish goes, then at midnight.
-		expect($ts('2026-11-20 15:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'morning: until 15:00');
-		expect($ts('2026-11-20 15:00'), Cache::until('2026-11-20', at('2026-11-20 14:59:59'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), '14:59:59: until 15:00');
-		expect($ts('2026-11-21 00:00'), Cache::until('2026-11-20', at('2026-11-20 15:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), '15:00: until midnight');
-		// Several days: not the end of the window, because the dish is back tomorrow.
-		expect($ts('2026-11-21 00:00'), Cache::until('2026-11-20', at('2026-11-20 16:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'three days, afternoon: next midnight');
-		expect($ts('2026-11-21 15:00'), Cache::until('2026-11-20', at('2026-11-21 08:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'three days, second morning: 15:00');
-		// Only `ab` and all-day dishes: as in 1.7, the end of the window.
-		$noUntil = [self::ROWS[1], self::ROWS[2]];
-		expect($ts('2026-11-23 00:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 3, 'Europe/Berlin', Menu::MODE_FROM, $noUntil), 'ab only: end of window');
-		expect($ts('2026-11-23 00:00'), Cache::until('2026-11-20', at('2026-11-20 10:00'), 3), 'no rows given: as before');
-		// Not valid today: next midnight, the time does not matter.
-		expect($ts('2026-11-20 00:00'), Cache::until('2026-11-20', at('2026-11-19 10:00'), 1, 'Europe/Berlin', Menu::MODE_FROM, self::ROWS), 'day before: midnight');
-		expect(null, Time::nextChange(self::ROWS, at('2026-11-20 15:00')), 'no change after 15:00');
-		expect(at('2026-11-20 15:00')->getTimestamp(), Time::nextChange(self::ROWS, at('2026-11-20 08:00'))?->getTimestamp(), 'next change 15:00');
-		holds(Time::hasUntil(self::ROWS) && !Time::hasUntil($noUntil), 'hasUntilTime');
 	}
 }

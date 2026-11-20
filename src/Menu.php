@@ -44,9 +44,9 @@ class Menu
 	/** Content field names. Sites already using them need no migration. */
 	public const FIELD_DATE = 'tageskarteDatum';
 	public const FIELD_DISHES = 'tagesgerichte';
+
 	/** Optional line under the dishes, kept when the menu is cleared. */
 	public const FIELD_NOTE = 'tageskarteHinweis';
-
 
 	/** Dishes shown at most; the blueprint allows the same number. */
 	public const MAX_DISHES = 5;
