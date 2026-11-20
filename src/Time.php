@@ -40,8 +40,8 @@ final class Time
 
 	/**
 	 * The time of a dish row: null for all day (`zeit` empty, `ganztags` or
-	 * unknown, or `uhrzeit` not a time), else `until` or `from` with `at` as
-	 * `HH:MM`.
+	 * unknown, `uhrzeit` not a time, or `bis` 00:00), else `until` or `from`
+	 * with `at` as `HH:MM`.
 	 *
 	 * @return array{mode: 'until'|'from', at: string}|null
 	 */
@@ -55,7 +55,11 @@ final class Time
 		};
 		$raw = $row['uhrzeit'] ?? '';
 		$at = is_string($raw) ? self::clock($raw) : null;
-		return $mode === null || $at === null ? null : ['mode' => $mode, 'at' => $at];
+		// `bis` 00:00 would hide the dish all day long; it is read as all day.
+		if ($mode === null || $at === null || ($mode === 'until' && $at === '00:00')) {
+			return null;
+		}
+		return ['mode' => $mode, 'at' => $at];
 	}
 
 	/**

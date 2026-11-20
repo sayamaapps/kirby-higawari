@@ -94,7 +94,8 @@ A dish can be tied to a time of day, for example a lunch dish until 15:00 and an
 
 - **`bis` 15:00:** shown until 14:59:59 with the note „bis 15 Uhr“, gone from 15:00 on. On a menu shown for several days it is back the next morning.
 - **`ab` 15:00:** shown all day with the note „ab 15 Uhr“, so guests see it in advance.
-- **`ganztags`**, an empty or unknown value, or a time that cannot be read: shown all day without a note. A dish is shown rather than lost.
+- **`ganztags`**, an empty or unknown value, or a time that cannot be read: shown all day without a note. A dish is shown rather than lost. The same for `bis` 00:00, which would otherwise hide the dish all day.
+- The Panel field takes the time to the minute (`step` 1 minute). With Kirby's default of 5 minutes a stored 23:58 would become 00:00.
 
 The time is taken in the configured `timezone`. When the last dish has gone, there is no card at all (as on a day without a menu). The five-dish cap counts before the time: a sixth row never moves up. JSON-LD follows the same rule, and the cache expires at the time (see [Caching](#caching)). Content without these fields is shown exactly as in 1.7.
 

@@ -8,6 +8,14 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.8.2] — 2026-11-20
+
+### Fixed
+
+- `uhrzeit` is stored to the minute (`step` 1 minute). Kirby rounded it to
+  5 minutes, so 23:58 became 00:00 and the dish disappeared all day.
+- `bis` 00:00 is read as all day instead of hiding the dish all day.
+
 ## [1.8.1] — 2026-11-20
 
 ### Added
