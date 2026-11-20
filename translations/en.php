@@ -49,11 +49,11 @@ return [
 	'panel.dish.variant.price.help' => 'Shown only together with a variant.',
 	'panel.dish.markers.label' => 'Markers (optional)',
 	'panel.dish.markers.help' => 'Free text, shown as written, for example “V, L”.',
-	'panel.dish.time.label' => 'Time',
+	'panel.dish.time.label' => 'Available',
 	'panel.dish.time.help' => 'All day: the whole day. Until: the dish disappears at the time, such as a lunch dish until 15:00. '
 		. 'From: the dish is shown all day, marked “from …”.',
-	'panel.dish.clock.label' => 'Time of day',
-	'panel.dish.clock.help' => 'Only used with “Until” or “From”.',
+	'panel.dish.clock.label' => 'At',
+	'panel.dish.clock.help' => 'Only used with “Until” or “From”, ignored for “All day”.',
 	'panel.note.label' => 'Note under the menu (optional)',
 	'panel.note.help' => 'One line under the dishes, such as “Tue–Fri until 15:00: lunch dish 9.90 €”. Stays when the menu '
 		. 'changes. Empty: no line.',
