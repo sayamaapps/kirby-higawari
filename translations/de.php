@@ -47,11 +47,11 @@ return [
 	'panel.dish.variant.price.help' => 'Wird nur zusammen mit einer Variante gezeigt.',
 	'panel.dish.markers.label' => 'Kennzeichnungen (optional)',
 	'panel.dish.markers.help' => 'Freier Text, wird so gezeigt, etwa „V, L“.',
-	'panel.dish.time.label' => 'Zeit',
+	'panel.dish.time.label' => 'Erhältlich',
 	'panel.dish.time.help' => 'Ganztags: den ganzen Tag. Bis: das Gericht verschwindet zur Uhrzeit, etwa ein Mittagsgericht bis 15 Uhr. '
 		. 'Ab: das Gericht steht den ganzen Tag da, mit dem Hinweis „ab … Uhr“.',
-	'panel.dish.clock.label' => 'Uhrzeit',
-	'panel.dish.clock.help' => 'Gilt nur bei „Bis“ oder „Ab“.',
+	'panel.dish.clock.label' => 'Uhr',
+	'panel.dish.clock.help' => 'Gilt nur bei „Bis“ oder „Ab“, bei „Ganztags“ egal.',
 	'panel.note.label' => 'Hinweis unter der Karte (optional)',
 	'panel.note.help' => 'Eine Zeile unter den Gerichten, etwa „Di–Fr bis 15 Uhr: Mittagsgericht 9,90 €“. Bleibt stehen, '
 		. 'wenn die Karte wechselt. Leer: keine Zeile.',

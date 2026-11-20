@@ -8,6 +8,12 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.8.3] — 2026-11-20
+
+### Changed
+
+- Panel labels of the time of day read as one phrase: „Erhältlich: Bis | Uhr: 15:00“ (en: „Available: Until | At: 15:00“) instead of „Zeit“ and „Uhrzeit“. Field names and values are unchanged.
+
 ## [1.8.2] — 2026-11-20
 
 ### Fixed
