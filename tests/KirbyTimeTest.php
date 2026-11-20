@@ -24,6 +24,9 @@ final class KirbyTimeTest extends TestCase
 		$on = ['sayamaapps.higawari.active' => true, 'sayamaapps.higawari.language' => 'de'];
 		higawari_with_site(['tageskarteDatum' => '2026-11-20'], function (string $tmp) use ($on) {
 			$kirby = higawari_kirby($tmp, $on);
+			// 1.8.1: the note field is a piece of its own, for sites with their own tab.
+			$pieces = $kirby->extensions('blueprints');
+			holds(isset($pieces['higawari/fields/note'], $pieces['higawari/fields/dishes'], $pieces['higawari/fields/date']), 'blueprint pieces date, dishes, note');
 			$kirby->impersonate('kirby');
 			// As the Panel saves it: a time field stores HH:MM:SS.
 			$kirby->page('home')->update([

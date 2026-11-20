@@ -8,6 +8,13 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.8.1] — 2026-11-20
+
+### Added
+
+- Blueprint piece `higawari/fields/note` for sites that build their own tab
+  instead of extending `higawari/tabs/daily-menu`; the tab uses it too.
+
 ## [1.8.0] — 2026-11-20
 
 ### Added

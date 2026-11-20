@@ -11,6 +11,7 @@ return [
 		return Panel::dateField($kirby);
 	},
 	'higawari/fields/dishes' => __DIR__ . '/../blueprints/fields/dishes.yml',
+	'higawari/fields/note' => __DIR__ . '/../blueprints/fields/note.yml',
 	'higawari/tabs/daily-menu' => function (App $kirby): array {
 		return Panel::tab($kirby);
 	},
