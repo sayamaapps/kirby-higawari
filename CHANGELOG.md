@@ -8,6 +8,23 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.8.0] — 2026-11-20
+
+### Added
+
+- **Time of day per dish:** dish fields `zeit` (`ganztags`, `bis`, `ab`) and
+  `uhrzeit` (default 15:00). `bis` is shown with „bis 15 Uhr“ and disappears
+  at that time; `ab` is shown all day with „ab 15 Uhr“. Class `Time`
+  (`Time::label()`, `Time::nextChange()`), snippet classes
+  `higawari-gericht-bis` / `-ab` and `higawari-zeit`. JSON-LD and Annai's
+  `hasMenu` follow the clock. Additive: content without the fields is shown as
+  before.
+- **Cache:** `Cache::until()` takes the dishes and expires at a dish's `bis`
+  time, then at midnight. `Daily::cacheUntil()` passes them.
+- **Note field** `tageskarteHinweis` in the tab: a line under the dishes that
+  stays when the menu changes; falls back to the option `note`. Marked for
+  Fude. `Daily::note()`.
+
 ## [1.7.0] — 2026-11-06
 
 ### Added

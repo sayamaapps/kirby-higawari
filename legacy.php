@@ -14,3 +14,4 @@ class_alias(\Sayamaapps\Higawari\Menu::class, 'Higawari\\Menu');
 class_alias(\Sayamaapps\Higawari\Options::class, 'Higawari\\Options');
 class_alias(\Sayamaapps\Higawari\Panel::class, 'Higawari\\Panel');
 class_alias(\Sayamaapps\Higawari\Schema::class, 'Higawari\\Schema');
+class_alias(\Sayamaapps\Higawari\Time::class, 'Higawari\\Time');

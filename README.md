@@ -71,6 +71,7 @@ The Panel tab writes two fields. Their names are a compatibility promise: sites 
 |---|---|---|
 | `tageskarteDatum` | date | "Gilt am", in mode `until` "Anzeigen bis": the day the menu is valid on, or with `dateMode` `until` the last day it is shown. Empty: nothing is shown. |
 | `tagesgerichte` | structure, max. 5 | The dishes (see below). |
+| `tageskarteHinweis` | text, max. 160 | Optional (1.8). A line under the dishes, such as „Di–Fr bis 15 Uhr: Mittagsgericht 9,90 €“. It stays when the menu changes or is cleared. Empty: the option `note`, if set. |
 
 Dish fields:
 
@@ -82,8 +83,20 @@ Dish fields:
 | `variante` | text, max. 60 | Optional. A second serving with its own price, such as „mit Wiener“ or „kleine Portion“, shown as its own line under the dish. `preis` is then the price without it. |
 | `variantenpreis` | number, 0 to 999, step 0.01 | Optional. The price of the variant; shown only with `variante`. |
 | `kennzeichnungen` | text, max. 40 | Optional markers, shown as written. |
+| `zeit` | toggles: `ganztags` (default), `bis`, `ab` | Optional (1.8). Time of day, see below. |
+| `uhrzeit` | time, default 15:00 | Optional (1.8). The time for `bis` and `ab`; ignored with `ganztags`. |
 
 Reading rules, the same for the Panel content and imported data: a dish without a name is dropped; a price that cannot be read (`abc`, `1000`, `12.345`) drops the dish rather than showing a wrong amount; a decimal comma and a decimal point both work; at most five dishes are shown, in order. A variant needs a name: a variant price alone is ignored, and a variant price that cannot be read drops the variant line, not the dish.
+
+### Time of day
+
+A dish can be tied to a time of day, for example a lunch dish until 15:00 and an afternoon dish from 15:00:
+
+- **`bis` 15:00:** shown until 14:59:59 with the note „bis 15 Uhr“, gone from 15:00 on. On a menu shown for several days it is back the next morning.
+- **`ab` 15:00:** shown all day with the note „ab 15 Uhr“, so guests see it in advance.
+- **`ganztags`**, an empty or unknown value, or a time that cannot be read: shown all day without a note. A dish is shown rather than lost.
+
+The time is taken in the configured `timezone`. When the last dish has gone, there is no card at all (as on a day without a menu). The five-dish cap counts before the time: a sixth row never moves up. JSON-LD follows the same rule, and the cache expires at the time (see [Caching](#caching)). Content without these fields is shown exactly as in 1.7.
 
 ### Two date modes
 
@@ -138,8 +151,9 @@ Markup, with classes only and no inline style:
   <h2 class="higawari-titel" id="higawari-titel">Tageskarte</h2>
   <p class="higawari-gilt"><time datetime="2026-10-10">Samstag, 10.10.2026</time></p>
   <ul class="higawari-gerichte">
-    <li class="higawari-gericht">
+    <li class="higawari-gericht">                 <!-- plus higawari-gericht-bis / -ab with a time -->
       <span class="higawari-name">Kartoffelsuppe</span>
+      <span class="higawari-zeit">bis 15 Uhr</span>          <!-- only with a time -->
       <span class="higawari-preis">6,90 €</span>
       <span class="higawari-variante">mit Wiener</span>          <!-- only with a variant -->
       <span class="higawari-variantenpreis">8,40 €</span>    <!-- only with a variant price -->
@@ -147,7 +161,7 @@ Markup, with classes only and no inline style:
       <p class="higawari-kennzeichnungen">Kennzeichnungen: V, L</p>
     </li>
   </ul>
-  <p class="higawari-hinweis">…</p>        <!-- only with the note option -->
+  <p class="higawari-hinweis">…</p>        <!-- only with a note (field tageskarteHinweis or option note) -->
 </section>
 ```
 
@@ -181,7 +195,7 @@ With [Annai](https://github.com/sayamaapps/kirby-annai) 2.6 or newer installed a
 
 ## Caching
 
-The menu changes only with the date or a Panel save, which flushes Kirby's page cache. So a page with the menu can be cached until the next midnight, or while a card is valid until the midnight after its last day. `$page->higawariCacheUntil()` (or `Sayamaapps\Higawari\Daily::cacheUntil($kirby, $page)`) returns that moment as a Unix time.
+The menu changes only with the date, a dish's time of day or a Panel save, which flushes Kirby's page cache. So a page with the menu can be cached until the next midnight, or while a card is valid until the midnight after its last day. A dish `bis` a time shortens this: the page expires when the dish disappears, and then at the next midnight (it is back the next day of a longer window). `$page->higawariCacheUntil()` (or `Sayamaapps\Higawari\Daily::cacheUntil($kirby, $page)`) returns that moment as a Unix time.
 
 Switch it on for the snippets:
 
@@ -209,7 +223,8 @@ $card = $page->higawariCard();                    // now, in the configured zone
 //     'from' => '2026-10-10', 'to' => '2026-10-10',   // mode until: from is today, to the date
 //     'dishes' => [
 //         ['name' => 'Kartoffelsuppe', 'lines' => ['mit Brot', 'und Kräutern'], 'price' => '6,90 €', 'amount' => '6.90', 'markers' => 'V, L',
-//          'variant' => ['label' => 'mit Wiener', 'price' => '8,40 €', 'amount' => '8.40']],   // or null
+//          'variant' => ['label' => 'mit Wiener', 'price' => '8,40 €', 'amount' => '8.40'],   // or null
+//          'time' => ['mode' => 'until', 'at' => '15:00']],   // or 'from', or null (all day); label: Time::label()
 //     ],
 // ]
 // or null: plugin off, not valid that day, or no usable dish
@@ -235,7 +250,10 @@ The dishes field carries a `fude:` marker, so a site with Fude 1.4 or later gets
 |---|---|
 | **Required** | `gericht` |
 | **Asked** | — (the menu comes as one message or a photo; asking every day would slow it down) |
-| **Free** | `beschreibung`, `preis`, `variante`, `variantenpreis`, `kennzeichnungen` |
+| **Free** | `beschreibung`, `preis`, `variante`, `variantenpreis`, `kennzeichnungen`, `zeit`, `uhrzeit` |
+
+- The time of day reaches the bot through the Panel's own label and help („Bis: das Gericht verschwindet zur Uhrzeit …“). A site that wants a house rule, such as „the dish at 9,90 is the lunch dish until 15:00“, writes it into its Fude profile, not into this package.
+- `tageskarteHinweis` carries `fude: true`, so it joins the page's own collection (`home`, action `update`): the bot can change or empty the line.
 
 - In mode `until` a change by chat without a named day sets the date to today, so the menu is shown until today only. The bot names the last day ("bis Freitag").
 - The collection is named `<page id>-tagesgerichte`, for example `home-tagesgerichte`.

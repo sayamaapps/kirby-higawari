@@ -13,12 +13,16 @@ return [
 	'day.5' => 'Friday', 'day.6' => 'Saturday', 'day.7' => 'Sunday',
 
 	// PHP date() format after the weekday.
+	'format.time' => '{hour}:{minute}',
+	'format.time.hour' => '{hour}:00',
 	'format.date' => 'j F Y',
 
 	// Snippet texts.
 	'snippet.heading' => 'Daily menu',
 	'snippet.range' => '{from} – {to}',
 	'snippet.markers' => 'Markers: {markers}',
+	'snippet.time.until' => 'until {time}',
+	'snippet.time.from' => 'from {time}',
 	'snippet.until' => 'Until {date}',
 
 	// Panel texts (blueprints use them as higawari.panel.*).
@@ -45,4 +49,12 @@ return [
 	'panel.dish.variant.price.help' => 'Shown only together with a variant.',
 	'panel.dish.markers.label' => 'Markers (optional)',
 	'panel.dish.markers.help' => 'Free text, shown as written, for example “V, L”.',
+	'panel.dish.time.label' => 'Time',
+	'panel.dish.time.help' => 'All day: the whole day. Until: the dish disappears at the time, such as a lunch dish until 15:00. '
+		. 'From: the dish is shown all day, marked “from …”.',
+	'panel.dish.clock.label' => 'Time of day',
+	'panel.dish.clock.help' => 'Only used with “Until” or “From”.',
+	'panel.note.label' => 'Note under the menu (optional)',
+	'panel.note.help' => 'One line under the dishes, such as “Tue–Fri until 15:00: lunch dish 9.90 €”. Stays when the menu '
+		. 'changes. Empty: no line.',
 ];

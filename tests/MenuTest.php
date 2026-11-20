@@ -114,14 +114,14 @@ final class MenuTest extends TestCase
 		expect(3, count($dishes), 'only the usable rows are kept');
 
 		expect(
-			['name' => 'Suppe', 'lines' => ['Mit Brot', 'Kräutern'], 'price' => '7,50 €', 'amount' => '7.50', 'markers' => 'V, L', 'variant' => null],
+			['name' => 'Suppe', 'lines' => ['Mit Brot', 'Kräutern'], 'price' => '7,50 €', 'amount' => '7.50', 'markers' => 'V, L', 'variant' => null, 'time' => null],
 			$dishes[0],
 			'first dish cleaned: trimmed, lines split, markers trimmed',
 		);
 
 		expect('12,50 €', $dishes[1]['price'], 'float price formatted');
 
-		expect(['name' => 'Ohne Preis', 'lines' => [], 'price' => '', 'amount' => '', 'markers' => '', 'variant' => null], $dishes[2], 'dish without price, lines or markers');
+		expect(['name' => 'Ohne Preis', 'lines' => [], 'price' => '', 'amount' => '', 'markers' => '', 'variant' => null, 'time' => null], $dishes[2], 'dish without price, lines or markers');
 
 		expect('7,00', Menu::dishes([['gericht' => 'A', 'preis' => '7']], '')[0]['price'], 'dishes without currency');
 
@@ -156,7 +156,7 @@ final class MenuTest extends TestCase
 		$rows = [['gericht' => 'Suppe', 'preis' => '7']];
 
 		expect(
-			['from' => '2026-10-10', 'to' => '2026-10-10', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null]]],
+			['from' => '2026-10-10', 'to' => '2026-10-10', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null, 'time' => null]]],
 			Menu::card('2026-10-10', $rows, at('2026-10-10 12:00'), 1, $zone, '€'),
 			'card on its day',
 		);
@@ -218,13 +218,13 @@ final class MenuTest extends TestCase
 
 		// Card in mode until: from is today in the zone, to is the date.
 		expect(
-			['from' => '2026-10-25', 'to' => '2026-10-30', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null]]],
+			['from' => '2026-10-25', 'to' => '2026-10-30', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null, 'time' => null]]],
 			Menu::card('2026-10-30', $rows, at('2026-10-25 12:00'), 1, $zone, '€', $until),
 			'until: card runs from today to the date',
 		);
 
 		expect(
-			['from' => '2026-10-26', 'to' => '2026-10-26', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null]]],
+			['from' => '2026-10-26', 'to' => '2026-10-26', 'dishes' => [['name' => 'Suppe', 'lines' => [], 'price' => '7,00 €', 'amount' => '7.00', 'markers' => '', 'variant' => null, 'time' => null]]],
 			Menu::card('2026-10-26', $rows, new DateTimeImmutable('2026-10-25T23:30:00Z'), 1, $zone, '€', $until),
 			'until: from is the zone\'s day (00:30 on 26.10. in Berlin)',
 		);

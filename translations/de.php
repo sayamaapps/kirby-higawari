@@ -11,12 +11,17 @@ return [
 
 	// PHP-date()-Format nach dem Wochentag.
 	'format.date' => 'd.m.Y',
+	// Uhrzeit neben einem Gericht: volle Stunde ohne Minuten („15 Uhr“), sonst „14:30 Uhr“.
+	'format.time' => '{hour}:{minute}',
+	'format.time.hour' => '{hour}',
 
 	// Texte der Anzeige.
 	'snippet.heading' => 'Tageskarte',
 	'snippet.range' => '{from} – {to}',
 	'snippet.markers' => 'Kennzeichnungen: {markers}',
 	'snippet.until' => 'Bis einschließlich {date}',
+	'snippet.time.until' => 'bis {time} Uhr',
+	'snippet.time.from' => 'ab {time} Uhr',
 
 	// Texte im Panel.
 	'panel.tab.label' => 'Tageskarte',
@@ -42,4 +47,12 @@ return [
 	'panel.dish.variant.price.help' => 'Wird nur zusammen mit einer Variante gezeigt.',
 	'panel.dish.markers.label' => 'Kennzeichnungen (optional)',
 	'panel.dish.markers.help' => 'Freier Text, wird so gezeigt, etwa „V, L“.',
+	'panel.dish.time.label' => 'Zeit',
+	'panel.dish.time.help' => 'Ganztags: den ganzen Tag. Bis: das Gericht verschwindet zur Uhrzeit, etwa ein Mittagsgericht bis 15 Uhr. '
+		. 'Ab: das Gericht steht den ganzen Tag da, mit dem Hinweis „ab … Uhr“.',
+	'panel.dish.clock.label' => 'Uhrzeit',
+	'panel.dish.clock.help' => 'Gilt nur bei „Bis“ oder „Ab“.',
+	'panel.note.label' => 'Hinweis unter der Karte (optional)',
+	'panel.note.help' => 'Eine Zeile unter den Gerichten, etwa „Di–Fr bis 15 Uhr: Mittagsgericht 9,90 €“. Bleibt stehen, '
+		. 'wenn die Karte wechselt. Leer: keine Zeile.',
 ];

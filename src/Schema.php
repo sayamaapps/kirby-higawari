@@ -24,7 +24,7 @@ class Schema
 	 * then a list: one dish, two servings. A dish without a price has no
 	 * `offers`. $id is the menu's `@id` ('' leaves it out).
 	 *
-	 * @param array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null}>} $card
+	 * @param array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>} $card
 	 * @return array<string, mixed>
 	 */
 	public static function menu(array $card, string $name, string $section, string $currencyCode = 'EUR', string $id = ''): array
