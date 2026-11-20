@@ -14,8 +14,4 @@ fields:
     extends: higawari/fields/dishes
   # A standing line under the dishes (1.8). Fude: part of the page collection.
   tageskarteHinweis:
-    label: higawari.panel.note.label
-    type: text
-    maxlength: 160
-    help: higawari.panel.note.help
-    fude: true
+    extends: higawari/fields/note

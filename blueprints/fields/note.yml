@@ -1,0 +1,7 @@
+# Text field `tageskarteHinweis` (1.8): a standing line under the dishes. Field
+# name: see fields/dishes.yml. Fude: part of the page's own collection.
+label: higawari.panel.note.label
+type: text
+maxlength: 160
+help: higawari.panel.note.help
+fude: true

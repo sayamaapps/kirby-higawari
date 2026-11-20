@@ -132,7 +132,7 @@ tabs:
     extends: higawari/tabs/daily-menu
 ```
 
-Pieces for your own blueprints: `higawari/tabs/daily-menu` (the tab), `higawari/fields/date` and `higawari/fields/dishes`. The tab and the date show the texts of the configured `dateMode`, so the same blueprint works in both modes.
+Pieces for your own blueprints: `higawari/tabs/daily-menu` (the tab), `higawari/fields/date`, `higawari/fields/dishes` and `higawari/fields/note` (1.8.1, the line under the dishes; use the field name `tageskarteHinweis`). The tab and the date show the texts of the configured `dateMode`, so the same blueprint works in both modes.
 
 ## Snippet
 
