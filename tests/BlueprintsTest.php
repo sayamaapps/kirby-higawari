@@ -73,6 +73,7 @@ final class BlueprintsTest extends TestCase
 				);
 				expect('ganztags', $zeit['default'] ?? null, "$language: time defaults to all day");
 				expect('time', $fields['tagesgerichte']['fields']['uhrzeit']['type'] ?? null, "$language: time of day is a time field");
+				expect(['size' => 1, 'unit' => 'minute'], array_intersect_key($fields['tagesgerichte']['fields']['uhrzeit']['step'] ?? [], ['unit' => 1, 'size' => 1]), "$language: time of day to the minute (1.8.2)");
 				expect(
 					$language === 'de' ? 'Hinweis unter der Karte (optional)' : 'Note under the menu (optional)',
 					$fields['tageskartehinweis']['label'] ?? null,

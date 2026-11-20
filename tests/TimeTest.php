@@ -137,6 +137,9 @@ final class TimeTest extends TestCase
 			['gericht' => 'D', 'zeit' => 'mittags', 'uhrzeit' => '15:00'],
 			['gericht' => 'E', 'uhrzeit' => '15:00'],
 		]);
+		expect(null, Menu::dishes([['gericht' => 'H', 'zeit' => 'bis', 'uhrzeit' => '00:00:00']])[0]['time'], 'bis 00:00 would hide it all day: all day');
+		expect(['mode' => 'from', 'at' => '00:00'], Menu::dishes([['gericht' => 'I', 'zeit' => 'ab', 'uhrzeit' => '00:00']])[0]['time'], 'ab 00:00 stays');
+		expect(['mode' => 'until', 'at' => '23:59'], Menu::dishes([['gericht' => 'J', 'zeit' => 'bis', 'uhrzeit' => '23:59:00']])[0]['time'], 'bis 23:59');
 		expect([null, null, null, null, null], array_column($odd, 'time'), 'bis without a readable time, unknown zeit, no zeit: all day');
 		$more = Menu::dishes([
 			['gericht' => 'F', 'zeit' => ' BIS ', 'uhrzeit' => '14:30'],

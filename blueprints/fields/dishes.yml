@@ -84,5 +84,10 @@ fields:
     label: higawari.panel.dish.clock.label
     type: time
     default: "15:00"
+    # Kirby rounds a time to its step (default 5 minutes) when it stores it:
+    # 23:58 would become 00:00. One minute keeps what was entered.
+    step:
+      unit: minute
+      size: 1
     width: 1/2
     help: higawari.panel.dish.clock.help
