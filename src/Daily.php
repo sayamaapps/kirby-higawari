@@ -77,6 +77,32 @@ class Daily
 	}
 
 	/**
+	 * The card of a page at $now (default: clock()), or null when the plugin is off, the menu is not valid that day or it has
+	 * no usable dish. Nothing is cached: the answer changes with the clock.
+	 *
+	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>}|null
+	 */
+	public static function card(App $kirby, Page $page, DateTimeImmutable|null $now = null): array|null
+	{
+		if (!Options::active($kirby)) {
+			return null;
+		}
+		$zone = Options::timezone($kirby);
+		$now = self::clock($kirby, $page, $now);
+		$mode = Options::dateMode($kirby);
+		return Menu::card(
+			(string)$page->{Menu::FIELD_DATE}()->value(),
+			$page->{Menu::FIELD_DISHES}()->yaml(),
+			$now,
+			// `days` only counts in mode `from`; in mode `until` it is not read at all.
+			$mode === Menu::MODE_FROM ? Options::days($kirby) : Options::DEFAULT_DAYS,
+			$zone,
+			Options::currency($kirby),
+			$mode,
+		);
+	}
+
+	/**
 	 * The clock a page's menu is shown at: $now when given, else now in the
 	 * configured zone. In the preview of changes (Kirby renders the `changes`
 	 * version, a Panel preview or a link with `_version=changes` and its
@@ -104,32 +130,6 @@ class Daily
 	}
 
 	/**
-	 * The card of a page at $now (default: clock()), or null when the plugin is off, the menu is not valid that day or it has
-	 * no usable dish. Nothing is cached: the answer changes with the clock.
-	 *
-	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>}|null
-	 */
-	public static function card(App $kirby, Page $page, DateTimeImmutable|null $now = null): array|null
-	{
-		if (!Options::active($kirby)) {
-			return null;
-		}
-		$zone = Options::timezone($kirby);
-		$now = self::clock($kirby, $page, $now);
-		$mode = Options::dateMode($kirby);
-		return Menu::card(
-			(string)$page->{Menu::FIELD_DATE}()->value(),
-			$page->{Menu::FIELD_DISHES}()->yaml(),
-			$now,
-			// `days` only counts in mode `from`; in mode `until` it is not read at all.
-			$mode === Menu::MODE_FROM ? Options::days($kirby) : Options::DEFAULT_DAYS,
-			$zone,
-			Options::currency($kirby),
-			$mode,
-		);
-	}
-
-	/**
 	 * The line under the dishes: the page field `tageskarteHinweis`, or, when
 	 * it is empty, the option `note`. Null shows nothing.
 	 */
@@ -137,6 +137,15 @@ class Daily
 	{
 		$field = $page !== null ? trim((string)$page->{Menu::FIELD_NOTE}()->value()) : '';
 		return $field !== '' ? $field : Options::note($kirby);
+	}
+
+	/**
+	 * Is Kirby rendering the `changes` version (the preview of unsaved
+	 * changes, Kirby's VersionId::$render) and is the option `preview` on?
+	 */
+	private static function previewing(App $kirby): bool
+	{
+		return VersionId::$render?->is(VersionId::CHANGES) === true && Options::output($kirby)['preview'];
 	}
 
 	/**
@@ -160,14 +169,5 @@ class Daily
 			Options::output($kirby)['priceCurrency'],
 			$page->url() . '#tageskarte',
 		);
-	}
-
-	/**
-	 * Is Kirby rendering the `changes` version (the preview of unsaved
-	 * changes, Kirby's VersionId::$render) and is the option `preview` on?
-	 */
-	private static function previewing(App $kirby): bool
-	{
-		return VersionId::$render?->is(VersionId::CHANGES) === true && Options::output($kirby)['preview'];
 	}
 }
