@@ -182,18 +182,35 @@ class Options
 	}
 
 	/**
-	 * The options of the JSON-LD, the Annai hook and the cache, read together:
-	 * `annai` (annai()), `cache` (cache()) and `priceCurrency` (priceCurrency()).
+	 * The options of the JSON-LD, the Annai hook, the cache and the preview,
+	 * read together: `annai` (annai()), `cache` (cache()), `preview`
+	 * (preview()) and `priceCurrency` (priceCurrency()).
 	 *
-	 * @return array{annai: string|bool, cache: bool, priceCurrency: string}
+	 * @return array{annai: string|bool, cache: bool, preview: bool, priceCurrency: string}
 	 */
 	public static function output(App $kirby): array
 	{
 		return [
 			'annai' => self::annai($kirby),
 			'cache' => self::cache($kirby),
+			'preview' => self::preview($kirby),
 			'priceCurrency' => self::priceCurrency($kirby),
 		];
+	}
+
+	/**
+	 * `sayamaapps.higawari.preview`: `true` (default) shows a card for a later
+	 * day in the preview of changes as on its day (Daily::clock()); `false`
+	 * uses the real clock there too.
+	 */
+	private static function preview(App $kirby): bool
+	{
+		$value = self::get($kirby, 'preview', true);
+		if (is_bool($value)) {
+			return $value;
+		}
+		self::invalid($kirby, 'Higawari: sayamaapps.higawari.preview must be true or false — using true.');
+		return true;
 	}
 
 	/**

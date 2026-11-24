@@ -59,6 +59,7 @@ All options are read as `sayamaapps.higawari.<name>`, flat or nested. The short 
 | `emptyText` | `null` | Shown in place of the menu when none is valid. `null` shows nothing. |
 | `note` | `null` | A line under the dishes, for example about prices or allergens. |
 | `cache` | `false` | `true` lets Kirby's page cache keep a page with the menu until the next change of date (see [Caching](#caching)). `false` keeps it out of the cache. |
+| `preview` | `true` | In the preview of changes, a card for a later day is shown as on its day (see [Preview](#preview)). `false` uses the real clock there too. |
 | `priceCurrency` | from `currency` | ISO 4217 code of the JSON-LD prices. Default: `EUR` for `€`, a three-letter `currency` as it is, else none. |
 | `annai` | `true` | Which page's menu goes into [Annai](#annai)'s business node: `true` the home page, a page id, `false` none. |
 | `language` | site language | `de` or `en`, for the snippet and Panel texts. Otherwise the default language, then the first two letters of `locale`, then English. |
@@ -215,6 +216,10 @@ Or set it in a template that prints the menu itself:
 ```
 
 Kirby keeps the earliest expiry of a response, so another snippet can only shorten it.
+
+## Preview
+
+Kirby's preview of unsaved changes (the Panel preview, or a link with `?_version=changes&_token=…`) renders the `changes` version. When the card there starts on a later day (mode `from`), the snippets, the page methods and Annai's `hasMenu` take 00:00 of that day as the clock: a menu written the evening before shows tomorrow's dishes, a dish `bis` a time included. A card for today or an earlier day keeps the real clock, so its preview shows what the page will show. Mode `until` has no first day and is not moved. The published page is not affected, and the preview is never cached. An explicit `$now` always wins. `Sayamaapps\Higawari\Daily::clock($kirby, $page)` returns the clock in use.
 
 ## Page method
 
