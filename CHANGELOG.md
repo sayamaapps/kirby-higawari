@@ -8,6 +8,18 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [1.9.0] — 2026-11-24
+
+### Added
+
+- **Preview of a later day:** when Kirby renders the `changes` version (Panel
+  preview, `?_version=changes` with its token) and the card starts after
+  today, the menu is shown at 00:00 of its first day: tomorrow's dishes are
+  visible in the preview the evening before. A card for today or earlier, mode
+  `until` and the published page keep the real clock. The preview is never
+  cached, even with the option `cache`. Option `preview` (default `true`),
+  `Daily::clock()`.
+
 ## [1.8.3] — 2026-11-20
 
 ### Changed

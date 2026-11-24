@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Kirby\Cms\App;
 use Kirby\Cms\Page;
+use Kirby\Content\VersionId;
 
 /**
  * The Kirby side of the menu: reads a page's fields and asks Menu for the card.
@@ -43,11 +44,12 @@ class Daily
 	/**
 	 * Kirby's page cache for a response that shows a page's menu: with the
 	 * option `cache` the response expires at cacheUntil(), else it is not
-	 * cached at all (the default, as in 1.6). Used by both snippets.
+	 * cached at all (the default, as in 1.6). Used by both snippets. The
+	 * preview of changes is never cached.
 	 */
 	public static function cacheResponse(App $kirby, Page|null $page, DateTimeImmutable|null $now = null): void
 	{
-		if ($page !== null && Options::output($kirby)['cache']) {
+		if ($page !== null && Options::output($kirby)['cache'] && !self::previewing($kirby)) {
 			$kirby->response()->expires(self::cacheUntil($kirby, $page, $now));
 			return;
 		}
@@ -62,7 +64,7 @@ class Daily
 	public static function cacheUntil(App $kirby, Page $page, DateTimeImmutable|null $now = null): int
 	{
 		$zone = Options::timezone($kirby);
-		$now ??= new DateTimeImmutable('now', new DateTimeZone($zone));
+		$now = self::clock($kirby, $page, $now);
 		$mode = Options::dateMode($kirby);
 		return Cache::until(
 			(string)$page->{Menu::FIELD_DATE}()->value(),
@@ -75,8 +77,7 @@ class Daily
 	}
 
 	/**
-	 * The card of a page at $now (default: the clock in the configured zone),
-	 * or null when the plugin is off, the menu is not valid that day or it has
+	 * The card of a page at $now (default: clock()), or null when the plugin is off, the menu is not valid that day or it has
 	 * no usable dish. Nothing is cached: the answer changes with the clock.
 	 *
 	 * @return array{from: string, to: string, dishes: list<array{name: string, lines: list<string>, price: string, amount: string, markers: string, variant: array{label: string, price: string, amount: string}|null, time: array{mode: 'until'|'from', at: string}|null}>}|null
@@ -87,7 +88,7 @@ class Daily
 			return null;
 		}
 		$zone = Options::timezone($kirby);
-		$now ??= new DateTimeImmutable('now', new DateTimeZone($zone));
+		$now = self::clock($kirby, $page, $now);
 		$mode = Options::dateMode($kirby);
 		return Menu::card(
 			(string)$page->{Menu::FIELD_DATE}()->value(),
@@ -102,6 +103,33 @@ class Daily
 	}
 
 	/**
+	 * The clock a page's menu is shown at: $now when given, else now in the
+	 * configured zone. In the preview of changes (Kirby renders the `changes`
+	 * version, a Panel preview or a link with `_version=changes` and its
+	 * token) of a card whose first day is after today, it is 00:00 of that day
+	 * instead: the card looks as it will on its day, a dish `bis` a time
+	 * included. Mode `until` has no first day and is shown as it is. Option
+	 * `preview` false switches this off.
+	 */
+	public static function clock(App $kirby, Page $page, DateTimeImmutable|null $now = null): DateTimeImmutable
+	{
+		if ($now !== null) {
+			return $now;
+		}
+		$zone = Options::timezone($kirby);
+		$now = new DateTimeImmutable('now', new DateTimeZone($zone));
+		if (!self::previewing($kirby) || Options::dateMode($kirby) !== Menu::MODE_FROM) {
+			return $now;
+		}
+		$date = trim((string)$page->{Menu::FIELD_DATE}()->value());
+		if (!Menu::isDate($date) || $date <= $now->format('Y-m-d')) {
+			return $now;
+		}
+		$day = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone($zone));
+		return $day === false ? $now : $day;
+	}
+
+	/**
 	 * The line under the dishes: the page field `tageskarteHinweis`, or, when
 	 * it is empty, the option `note`. Null shows nothing.
 	 */
@@ -109,6 +137,15 @@ class Daily
 	{
 		$field = $page !== null ? trim((string)$page->{Menu::FIELD_NOTE}()->value()) : '';
 		return $field !== '' ? $field : Options::note($kirby);
+	}
+
+	/**
+	 * Is Kirby rendering the `changes` version (the preview of unsaved
+	 * changes, Kirby's VersionId::$render) and is the option `preview` on?
+	 */
+	private static function previewing(App $kirby): bool
+	{
+		return VersionId::$render?->is(VersionId::CHANGES) === true && Options::output($kirby)['preview'];
 	}
 
 	/**
