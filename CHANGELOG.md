@@ -8,6 +8,19 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
+## [Unreleased]
+
+### Added
+
+- Kirby 6 is supported next to Kirby 5 (`getkirby/cms` `^5.0 || ^6.0`). Kirby 6 itself
+  needs PHP 8.3 or newer; the plugin still runs on PHP 8.2 with Kirby 5.
+
+### Fixed
+
+- A menu date that arrives as a Unix time (Kirby 6 reads an unquoted YAML date
+  such as `2026-11-21` as a number) is read as that date again, instead of the
+  card being left out.
+
 ## [1.9.0] — 2026-11-24
 
 ### Added
