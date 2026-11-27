@@ -114,17 +114,6 @@ class Menu
 	}
 
 	/**
-	 * A stored date as text, surrounding whitespace removed. Kirby 6 reads an
-	 * unquoted YAML date (`2026-11-21`) as the Unix time 1795219200: that
-	 * becomes "Y-m-d", read in UTC. Fewer than 9 digits are no Unix time.
-	 */
-	public static function date(string $value): string
-	{
-		$value = trim($value);
-		return preg_match('/^\d{9,10}$/', $value) ? gmdate('Y-m-d', (int)$value) : $value;
-	}
-
-	/**
 	 * One cleaned dish from a structure row, or null when the row has no name or
 	 * its price cannot be read. The variant is a second serving with its own
 	 * price, such as „mit Wiener“: null without a variant name, and null when
@@ -190,7 +179,7 @@ class Menu
 		if (!self::isDate($date)) {
 			return '';
 		}
-		$day = DateTimeImmutable::createFromFormat('!Y-m-d', self::date($date), new DateTimeZone('UTC'));
+		$day = DateTimeImmutable::createFromFormat('!Y-m-d', Time::date($date), new DateTimeZone('UTC'));
 		if ($day === false) {
 			return '';
 		}
@@ -216,7 +205,7 @@ class Menu
 	/** Strict `Y-m-d`, surrounding whitespace allowed, no overflow (2026-02-31 is not a date). */
 	public static function isDate(string $date): bool
 	{
-		$date = self::date($date);
+		$date = Time::date($date);
 		$parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone('UTC'));
 		return $parsed !== false && $parsed->format('Y-m-d') === $date;
 	}
@@ -298,7 +287,7 @@ class Menu
 		if (!self::isDate($date)) {
 			return null;
 		}
-		$day = DateTimeImmutable::createFromFormat('!Y-m-d', self::date($date), new DateTimeZone($timezone));
+		$day = DateTimeImmutable::createFromFormat('!Y-m-d', Time::date($date), new DateTimeZone($timezone));
 		if ($day === false) {
 			return null;
 		}

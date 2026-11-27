@@ -39,6 +39,17 @@ final class Time
 	}
 
 	/**
+	 * A stored date as text, surrounding whitespace removed. Kirby 6 reads an
+	 * unquoted YAML date (`2026-11-21`) as the Unix time 1795219200: that
+	 * becomes "Y-m-d", read in UTC. Fewer than 9 digits are no Unix time.
+	 */
+	public static function date(string $value): string
+	{
+		$value = trim($value);
+		return preg_match('/^\d{9,10}$/', $value) ? gmdate('Y-m-d', (int)$value) : $value;
+	}
+
+	/**
 	 * The time of a dish row: null for all day (`zeit` empty, `ganztags` or
 	 * unknown, `uhrzeit` not a time, or `bis` 00:00), else `until` or `from`
 	 * with `at` as `HH:MM`.
