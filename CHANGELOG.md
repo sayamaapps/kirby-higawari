@@ -8,7 +8,7 @@ All notable changes to this project are documented here. Versions follow
   without configuration) is a **major** version: a site would show other dishes
   after a routine update.
 
-## [Unreleased]
+## [1.10.0] — 2026-11-27
 
 ### Added
 
