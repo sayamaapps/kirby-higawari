@@ -202,7 +202,10 @@ class Menu
 		return $currency === '' ? $formatted : $formatted . ' ' . $currency;
 	}
 
-	/** Strict `Y-m-d`, surrounding whitespace allowed, no overflow (2026-02-31 is not a date). */
+	/**
+	 * Strict `Y-m-d` or a Unix time (Time::date()), surrounding whitespace
+	 * allowed, no overflow (2026-02-31 is not a date).
+	 */
 	public static function isDate(string $date): bool
 	{
 		$date = Time::date($date);

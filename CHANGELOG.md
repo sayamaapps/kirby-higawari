@@ -17,9 +17,10 @@ All notable changes to this project are documented here. Versions follow
 
 ### Fixed
 
-- A menu date that arrives as a Unix time (Kirby 6 reads an unquoted YAML date
-  such as `2026-11-21` as a number) is read as that date again, instead of the
-  card being left out.
+- `Menu` and the page cache read a date given as a Unix time instead of dropping
+  it. This concerns a date taken from YAML, such as a structure field of the site:
+  Kirby 6 reads an unquoted `2026-11-21` there as a number. The card's own date is
+  a page field, which Kirby 6 still reads as text.
 
 ## [1.9.0] — 2026-11-24
 
