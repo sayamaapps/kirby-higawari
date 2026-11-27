@@ -121,7 +121,7 @@ class Daily
 		if (!self::previewing($kirby) || Options::dateMode($kirby) !== Menu::MODE_FROM) {
 			return $now;
 		}
-		$date = trim((string)$page->{Menu::FIELD_DATE}()->value());
+		$date = Time::date((string)$page->{Menu::FIELD_DATE}()->value());
 		if (!Menu::isDate($date) || $date <= $now->format('Y-m-d')) {
 			return $now;
 		}

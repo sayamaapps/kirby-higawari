@@ -3,6 +3,7 @@
 use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Sayamaapps\Higawari\Cache;
 use Sayamaapps\Higawari\I18n;
 use Sayamaapps\Higawari\Menu;
 
@@ -17,6 +18,30 @@ final class MenuTest extends TestCase
 	protected function tearDown(): void
 	{
 		App::destroy();
+	}
+
+	/**
+	 * Kirby 6 reads YAML with Symfony: a date stored unquoted
+	 * (`2026-11-21`) arrives as the Unix time 1795219200.
+	 */
+	public function testDatesAsUnixTime(): void
+	{
+		I18n::setLanguage('de');
+		$rows = [['gericht' => 'Suppe', 'preis' => '5']];
+
+		expect(true, Menu::isDate('1795219200'), 'a Unix time is a date');
+		expect(Menu::displayDate('2026-11-21'), Menu::displayDate('1795219200'), 'shown as that date');
+		expect(['from' => '2026-11-21', 'to' => '2026-11-22'], Menu::window('1795219200', 2), 'window');
+		$card = Menu::card('1795219200', $rows, at('2026-11-21 12:00'));
+		expect(['2026-11-21', 'Suppe'], [$card['from'] ?? null, $card['dishes'][0]['name'] ?? null], 'card on its day');
+		expect(
+			at('2026-11-22 00:00')->getTimestamp(),
+			Cache::until('1795219200', at('2026-11-21 12:00')),
+			'cached until the end of that day',
+		);
+		foreach (['2026', '20261121'] as $junk) {
+			expect(false, Menu::isDate($junk), 'no Unix time: ' . $junk);
+		}
 	}
 
 	public function testSuite(): void

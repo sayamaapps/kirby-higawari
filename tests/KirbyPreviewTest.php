@@ -98,6 +98,25 @@ final class KirbyPreviewTest extends TestCase
 			throws(InvalidArgumentException::class, fn () => Options::output(higawari_kirby($tmp, ['debug' => true, 'sayamaapps.higawari.preview' => 'ja'])), 'broken preview option');
 		});
 	}
+
+	/** A date Kirby 6 reads as a Unix time keeps the preview on the card's day. */
+	public function testUnixTimeDate(): void
+	{
+		$date = at('now')->modify('+1 day')->format('Y-m-d');
+		$stored = (string)(new DateTimeImmutable($date, new DateTimeZone('UTC')))->getTimestamp();
+		$on = ['sayamaapps.higawari.active' => true];
+
+		higawari_with_site([], function (string $tmp) use ($on, $date, $stored) {
+			$kirby = higawari_kirby($tmp, $on);
+			$kirby->impersonate('kirby');
+			$kirby->page('home')->version(VersionId::changes())->save([
+				'tageskarteDatum' => $stored,
+				'tagesgerichte' => [['gericht' => 'Neues Curry', 'preis' => '9.9']],
+			]);
+			$card = VersionId::render('changes', fn () => $kirby->page('home')->higawariCard());
+			expect($date, $card['from'] ?? null, 'preview: the card of its day');
+		});
+	}
 }
 
 /** higawari_kirby() with a request query, as Kirby reads ?_version and ?_token. */

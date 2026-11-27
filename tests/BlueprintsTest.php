@@ -7,6 +7,19 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Sayamaapps\Higawari\Menu;
 
+/**
+ * The tab labels of a blueprint. Blueprint::tabs() returns a list of arrays in
+ * Kirby 5 and a Tabs collection of Tab objects in Kirby 6.
+ */
+function higawari_tab_labels(object $blueprint): array
+{
+	$labels = [];
+	foreach ($blueprint->tabs() as $tab) {
+		$labels[] = is_array($tab) ? $tab['label'] : $tab->label();
+	}
+	return $labels;
+}
+
 #[CoversClass(Sayamaapps\Higawari\Panel::class)]
 #[RunTestsInSeparateProcesses]
 final class BlueprintsTest extends TestCase
@@ -52,8 +65,8 @@ final class BlueprintsTest extends TestCase
 				$page = $kirby->page('home');
 
 				// Kirby lowercases field names in the form.
-				expect([$tab], array_column($page->blueprint()->tabs(), 'label'), "$language: tab label");
-				$fields = Form::for($page, ['values' => []])->fields()->toArray();
+				expect([$tab], higawari_tab_labels($page->blueprint()), "$language: tab label");
+				$fields = Form::for($page)->fields()->toArray();
 
 				expect($date, $fields['tageskartedatum']['label'] ?? null, "$language: date label");
 				expect('date', $fields['tageskartedatum']['type'] ?? null, "$language: date is a date field");
@@ -68,7 +81,8 @@ final class BlueprintsTest extends TestCase
 				expect(['ganztags', 'bis', 'ab'], array_column($zeit['options'] ?? [], 'value'), "$language: time values");
 				expect(
 					$language === 'de' ? ['Ganztags', 'Bis', 'Ab'] : ['All day', 'Until', 'From'],
-					array_column($zeit['options'] ?? [], 'text'),
+					// Kirby 6 hands the option texts out as HtmlString objects.
+					array_map('strval', array_column($zeit['options'] ?? [], 'text')),
 					"$language: time option texts",
 				);
 				expect('ganztags', $zeit['default'] ?? null, "$language: time defaults to all day");
@@ -109,11 +123,11 @@ final class BlueprintsTest extends TestCase
 				$kirby->setCurrentTranslation($language);
 				$page = $kirby->page('home');
 
-				$fields = Form::for($page, ['values' => []])->fields()->toArray();
+				$fields = Form::for($page)->fields()->toArray();
 				expect($label, $fields['tageskartedatum']['label'] ?? null, "until $language: date label");
-				expect('<p>' . $help . '</p>', $fields['tageskartedatum']['help'] ?? null, "until $language: date help (Kirby wraps help in a paragraph)");
+				expect('<p>' . $help . '</p>', (string)($fields['tageskartedatum']['help'] ?? ''), "until $language: date help (Kirby wraps help in a paragraph)");
 				expect('date', $fields['tageskartedatum']['type'] ?? null, "until $language: still a date field");
-				expect('<p>' . $info . '</p>', $fields['higawariinfo']['text'] ?? null, "until $language: tab info text");
+				expect('<p>' . $info . '</p>', (string)($fields['higawariinfo']['text'] ?? ''), "until $language: tab info text");
 
 				// Fude translates the raw blueprint label itself, so the bot reads "Anzeigen bis" / "Shown until".
 				$raw = $page->blueprint()->fields()['tageskarteDatum'];
@@ -122,7 +136,7 @@ final class BlueprintsTest extends TestCase
 
 			$kirby = higawari_kirby($tmp, ['sayamaapps.higawari.active' => true]);
 			$kirby->setCurrentTranslation('de');
-			$fields = Form::for($kirby->page('home'), ['values' => []])->fields()->toArray();
+			$fields = Form::for($kirby->page('home'))->fields()->toArray();
 			expect('Gilt am', $fields['tageskartedatum']['label'] ?? null, 'from: label back to "Gilt am" after an until run');
 		});
 

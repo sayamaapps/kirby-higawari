@@ -179,7 +179,7 @@ class Menu
 		if (!self::isDate($date)) {
 			return '';
 		}
-		$day = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone('UTC'));
+		$day = DateTimeImmutable::createFromFormat('!Y-m-d', Time::date($date), new DateTimeZone('UTC'));
 		if ($day === false) {
 			return '';
 		}
@@ -202,10 +202,13 @@ class Menu
 		return $currency === '' ? $formatted : $formatted . ' ' . $currency;
 	}
 
-	/** Strict `Y-m-d`, surrounding whitespace allowed, no overflow (2026-02-31 is not a date). */
+	/**
+	 * Strict `Y-m-d` or a Unix time (Time::date()), surrounding whitespace
+	 * allowed, no overflow (2026-02-31 is not a date).
+	 */
 	public static function isDate(string $date): bool
 	{
-		$date = trim($date);
+		$date = Time::date($date);
 		$parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone('UTC'));
 		return $parsed !== false && $parsed->format('Y-m-d') === $date;
 	}
@@ -287,7 +290,7 @@ class Menu
 		if (!self::isDate($date)) {
 			return null;
 		}
-		$day = DateTimeImmutable::createFromFormat('!Y-m-d', trim($date), new DateTimeZone($timezone));
+		$day = DateTimeImmutable::createFromFormat('!Y-m-d', Time::date($date), new DateTimeZone($timezone));
 		if ($day === false) {
 			return null;
 		}

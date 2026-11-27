@@ -1,8 +1,8 @@
 # Higawari
 
-**Kirby 5 · PHP 8.2 to 8.5 · MIT**
+**Kirby 5 and 6 · PHP 8.2 to 8.5 · MIT**
 
-Daily menu for [Kirby CMS](https://getkirby.com) 5. *Higawari* (日替わり) is Japanese for "changes every day": a menu of dishes, each menu valid on a date you set, shown on that day and nothing else.
+Daily menu for [Kirby CMS](https://getkirby.com) 5 and 6. *Higawari* (日替わり) is Japanese for "changes every day": a menu of dishes, each menu valid on a date you set, shown on that day and nothing else.
 
 - **A date, a window.** A menu is valid on its date, or on as many days as the site sets, counted from that date. Without a date nothing is shown, so an old card cannot linger.
 - **The Panel.** A tab with the date and up to five dishes (name, further lines, price, an optional variant with its own price, markers). Dish names are the only required text.
@@ -14,7 +14,7 @@ Code, comments and this README are in English. The Panel texts and the snippet t
 
 ## Requirements
 
-- Kirby 5 (`getkirby/cms` ^5.0)
+- Kirby 5 or 6 (`getkirby/cms` `^5.0 || ^6.0`); Kirby 6 needs PHP 8.3 or newer
 - PHP 8.2 to 8.5, with the `mbstring` extension
 
 ## Installation
@@ -312,7 +312,7 @@ composer global require getkirby/php-cs:0.2.1 sebastian/phpcpd:6.0.3
 kirby-cs fix --dry-run --diff     # code style; getkirby/php-cs needs PHP 8.3 or newer
 ```
 
-The Kirby tests boot a real Kirby 5 on a throwaway site and need no network connection. CI runs the tests on PHP 8.2 to 8.5 with the lowest and the highest dependency versions, and against the Kirby 6 pre-release as a warning.
+The Kirby tests boot a real Kirby on a throwaway site and need no network connection. CI runs the tests on PHP 8.2 to 8.5 with the lowest, the highest and the locked dependency versions on Kirby 5, and on PHP 8.3 to 8.5 with Kirby 6.
 
 ## Changelog
 
